@@ -390,19 +390,38 @@ setInterval(() => { loadLiveData(); }, 5 * 60 * 1000);
 
 <script>
 // ============ LIVE DATA CONFIG ============
-const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv';
-const SHEETS_EXPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv';
+// === ตั้งค่า URL ===
+// หลัง Deploy Apps Script ให้แทนที่ YOUR_APPS_SCRIPT_URL ด้านล่าง
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFsdXCTCD247_p3EnyiJVwmbkA1OYxLKOZ1GcqKNpOE1frTxB3AinTDKMinixYBZPlJg/exec';
+const SHEETS_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv';
 
 async function loadLiveData() {
   const btn = document.getElementById('syncBtn');
   if(btn) btn.textContent = '⏳ กำลังโหลด...';
   try {
-    // Try gviz endpoint directly first, then with proxy, then export URL
+    // 1. ลอง Apps Script URL ก่อน (ดีที่สุด ไม่มีปัญหา CORS)
+    if(APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL') {
+      try {
+        const r = await fetch(APPS_SCRIPT_URL);
+        if(r.ok) {
+          const json = await r.json();
+          if(json && json.agencies && json.agencies.length > 0) {
+            Object.assign(window.DATA, json);
+            renderOverview();
+            const lastEl = document.getElementById('lastUpdate');
+            if(lastEl) lastEl.textContent = json.updated || new Date().toLocaleTimeString('th-TH');
+            if(btn) { btn.textContent = '✅ อัปเดตแล้ว'; setTimeout(()=>btn.textContent='🔄 อัปเดต',2500); }
+            return true;
+          }
+        }
+      } catch(e) { console.warn('Apps Script failed:', e); }
+    }
+    // 2. Fallback: ดึง CSV จาก Google Sheets ผ่าน proxy
     let csv = null;
     const urlsToTry = [
       SHEETS_CSV_URL,
       `https://corsproxy.io/?${encodeURIComponent(SHEETS_CSV_URL)}`,
-      `https://corsproxy.io/?${encodeURIComponent(SHEETS_EXPORT_URL)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEETS_CSV_URL)}`,
     ];
     for(const url of urlsToTry) {
       try {
@@ -1727,19 +1746,38 @@ setInterval(() => { loadLiveData(); }, 5 * 60 * 1000);
 
 <script>
 // ============ LIVE DATA CONFIG ============
-const SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv';
-const SHEETS_EXPORT_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv';
+// === ตั้งค่า URL ===
+// หลัง Deploy Apps Script ให้แทนที่ YOUR_APPS_SCRIPT_URL ด้านล่าง
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFsdXCTCD247_p3EnyiJVwmbkA1OYxLKOZ1GcqKNpOE1frTxB3AinTDKMinixYBZPlJg/exec';
+const SHEETS_CSV_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv';
 
 async function loadLiveData() {
   const btn = document.getElementById('syncBtn');
   if(btn) btn.textContent = '⏳ กำลังโหลด...';
   try {
-    // Try gviz endpoint directly first, then with proxy, then export URL
+    // 1. ลอง Apps Script URL ก่อน (ดีที่สุด ไม่มีปัญหา CORS)
+    if(APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL') {
+      try {
+        const r = await fetch(APPS_SCRIPT_URL);
+        if(r.ok) {
+          const json = await r.json();
+          if(json && json.agencies && json.agencies.length > 0) {
+            Object.assign(window.DATA, json);
+            renderOverview();
+            const lastEl = document.getElementById('lastUpdate');
+            if(lastEl) lastEl.textContent = json.updated || new Date().toLocaleTimeString('th-TH');
+            if(btn) { btn.textContent = '✅ อัปเดตแล้ว'; setTimeout(()=>btn.textContent='🔄 อัปเดต',2500); }
+            return true;
+          }
+        }
+      } catch(e) { console.warn('Apps Script failed:', e); }
+    }
+    // 2. Fallback: ดึง CSV จาก Google Sheets ผ่าน proxy
     let csv = null;
     const urlsToTry = [
       SHEETS_CSV_URL,
       `https://corsproxy.io/?${encodeURIComponent(SHEETS_CSV_URL)}`,
-      `https://corsproxy.io/?${encodeURIComponent(SHEETS_EXPORT_URL)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEETS_CSV_URL)}`,
     ];
     for(const url of urlsToTry) {
       try {
@@ -2679,10 +2717,4 @@ function trkClear(){
     <div class="trk-form-row"><label>หมายเหตุเพิ่มเติม</label><textarea id="trkMNote" placeholder="หมายเหตุ / ข้อมูลเพิ่มเติม"></textarea></div>
     <div class="trk-modal-btns">
       <button class="trk-btn-cancel" onclick="document.getElementById('trkModalBg').classList.remove('open')">ยกเลิก</button>
-      <button class="trk-btn-save" onclick="trkSaveModal()">💾 บันทึก</button>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
+      <button class="trk-btn-save" onclick=
