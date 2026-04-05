@@ -1,124 +1,926 @@
-<!DOCTYPE html>
-<html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACR Budget Dashboard - Fixed</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Kanit', sans-serif; background-color: #f1f5f9; }
-        .data-card { background: white; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    </style>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<title>UBN Budget Plus ระบบติดตามสถานะการเใช้จ่ายเงินงบประมาณของจังหวัดอุบลราชธานี</title>
+
+<link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="Start your development with a Dashboard for Bootstrap 4.">
+  
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css">  
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="dist/css/adminlte1.min.css?v=1.1.1">
+  <!-- Google Font: Source Sans Pro -->
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="css/csslogin.css"/> 
+  <link rel="stylesheet" type="text/css" href="css/cssComment.css"/>   
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="plugins/sweetalert2/sweetalert2.min.css">  
+  
+  
+  <link href="css/rating.css" rel="stylesheet" type="text/css">  
 </head>
-<body class="min-h-screen pb-10">
 
-    <nav class="bg-[#1e3a8a] text-white p-6 shadow-md mb-6">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold">ACR BUDGET PLUS</h1>
-                <p class="text-blue-200 text-sm">Dashboard ติดตามงบประมาณ (ฉบับแก้ไขระบบดึงข้อมูล)</p>
-            </div>
-            <button onclick="loadData()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-lg text-sm transition">
-                🔄 รีเฟรชข้อมูล
-            </button>
-        </div>
+ <script type="text/javascript" src="js/j_Login.js?v=1.1.1"></script>
+ 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+
+<body class="sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed sidebar-collapse">
+  <div class="wrapper">
+	    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-dark navbar-blue">
+      <!-- Left navbar links -->
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+          <a href="./" class="nav-link"> <i class="nav-icon fas fa-home"></i> Home</a>
+        </li>
+      </ul>
+
+      <!-- Right navbar links -->
+	        <ul class="navbar-nav ml-auto">
+        <li class="nav-item" id="ck_login" style="display:block">
+          	<a class="nav-link" href="#" onclick="openForm();"><i class="fa fa-key"></i>&nbsp;Login</a>
+        </li>
+        <li class="nav-item" id="ck_name" style="display:none">
+          	<a class="nav-link" href="#"><i class="fa fa-user"></i>&nbsp;<span id="l_name">Name</span></a>
+        </li>
+        <li class="nav-item" id="ck_logout" style="display:none">
+          	<a class="nav-link" href="#" onclick="logut();"><i class="fa fa-power-off"></i>&nbsp;Logout</a>
+        </li>
+      </ul>
+	  			
+	  
     </nav>
+    <!-- /.navbar -->
 
-    <div class="max-w-7xl mx-auto px-4">
-        <div id="summary" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
-            <div class="data-card p-6 border-b-4 border-blue-600 italic text-gray-400">กำลังโหลดข้อมูล...</div>
-        </div>
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar elevation-4 sidebar-light-orange">
+	      <!-- Brand Logo -->
+      <a href="./" class="brand-link navbar-purple">
+        <img src="./images/cgd_logo1.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+            style="opacity: .8">
+        <span class="brand-text font-weight-light">รายการงบประมาณ</span>
+      </a>
 
-        <div class="data-card overflow-hidden">
-            <div class="p-5 border-b font-bold text-lg text-gray-800 bg-gray-50">
-                📊 รายงานการเบิกจ่ายรายหน่วยงาน
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-100 text-gray-600 text-sm">
-                        <tr>
-                            <th class="p-4">หน่วยงาน</th>
-                            <th class="p-4 text-right">งบประมาณ (ล้าน)</th>
-                            <th class="p-4 text-right">เบิกจ่าย (ล้าน)</th>
-                            <th class="p-4 text-center">ร้อยละ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="divide-y">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+      <!-- Sidebar -->
+      <div class="sidebar">        
 
-    <script>
-        const CSV_URL = 'https://docs.google.com/spreadsheets/d/1InruqYSLdiuIYZNUbiNqzioHTvUwoH5Tz2jTCFjPjnE/export?format=csv&gid=391006169';
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">            
 
-        async function loadData() {
-            try {
-                const res = await fetch(CSV_URL);
-                const text = await res.text();
-                const rows = text.split('\n').map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
+            <li class="nav-item">
+              <a href="./" class="nav-link active">
+                <i class="nav-icon fas fa-home"></i>
+				<p>หน้าหลัก<span class="right badge badge-danger"></span></p>
+              </a>
+            </li>
 
-                // ค้นหาบรรทัดที่มีข้อมูลจริง (หาคำว่า "หน่วยงาน")
-                const startIndex = rows.findIndex(r => r[0] && r[0].includes("หน่วยงาน"));
-                
-                if (startIndex === -1) {
-                    document.getElementById('summary').innerHTML = "<div class='col-span-3 text-red-500 p-10'>ไม่พบหัวตาราง 'หน่วยงาน' ใน Google Sheets ของคุณ</div>";
-                    return;
-                }
+            <li class="nav-item"> 
+				<a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904" class="nav-link ">
+                <i class="nav-icon fas fas fa-wallet"></i>				
+				<p>งบส่วนราชการ <span class="right badge badge-danger"></span></p>
+				</a>
+			</li>
 
-                // ดึงเฉพาะแถวข้อมูล (ข้ามหัวตารางไป 1 บรรทัด)
-                const cleanData = rows.slice(startIndex + 1).filter(r => {
-                    const name = r[0] ? r[0].replace(/"/g, '').trim() : "";
-                    return name !== "" && !name.includes("Grand Total") && !name.includes("รายงาน");
-                });
+				<li class="nav-item">
+				  <a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904" class="nav-link ">
+					<i class="nav-icon fas fa-angle-right"></i>
+					<p>งบประจำ<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
 
-                render(cleanData);
-            } catch (e) {
-                alert("เกิดข้อผิดพลาดในการดึงข้อมูล");
-            }
-        }
+				<li class="nav-item">
+				  <a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904" class="nav-link ">
+					<i class="nav-icon fas fa-angle-right"></i>	
+					<p>งบลงทุน<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>	
+  
 
-        function render(data) {
-            let totalB = 0, totalS = 0, html = "";
-            const clean = (v) => parseFloat(String(v).replace(/[",]/g, '')) || 0;
+            <li class="nav-item">   
+				<a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904" class="nav-link ">
+                <i class="nav-icon fas fas fa-wallet"></i>	
+				<p>งบจังหวัด<span class="right badge badge-danger"></span></p>
+				</a>
+			</li>
 
-            data.forEach(r => {
-                const name = r[0].replace(/"/g, '').trim();
-                const b = clean(r[1]);
-                const s = clean(r[2]);
-                const p = b > 0 ? ((s/b)*100).toFixed(2) : 0;
+				<li class="nav-item">
+				  <a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904" class="nav-link ">	
+					<i class="nav-icon fas fa-angle-right"></i>
+					<p>งบประจำ<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
 
-                totalB += b; totalS += s;
-                html += `
-                    <tr class="hover:bg-blue-50">
-                        <td class="p-4 font-medium">${name}</td>
-                        <td class="p-4 text-right text-blue-800">${b.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
-                        <td class="p-4 text-right text-green-700">${s.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
-                        <td class="p-4 text-center font-bold ${p > 50 ? 'text-green-600' : 'text-orange-500'}">${p}%</td>
-                    </tr>`;
-            });
+				<li class="nav-item">
+				  <a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904" class="nav-link ">
+					<i class="nav-icon fas fa-angle-right"></i>					  
+					<p>งบลงทุน<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
 
-            const totalP = totalB > 0 ? ((totalS/totalB)*100).toFixed(2) : 0;
+            <li class="nav-item">   
+				<a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904" class="nav-link ">
+                <i class="nav-icon fas fas fa-wallet"></i>				
+				<p>งบกลุ่มจังหวัด<span class="right badge badge-danger"></span></p>
+				</a>
+			</li>
 
-            document.getElementById('summary').innerHTML = `
-                <div class="data-card p-6 border-b-4 border-blue-600">
-                    <p class="text-gray-500 text-xs">งบประมาณรวม</p>
-                    <p class="text-2xl font-bold">${totalB.toLocaleString()} <span class="text-sm font-normal">ล้าน</span></p>
-                </div>
-                <div class="data-card p-6 border-b-4 border-green-600">
-                    <p class="text-gray-500 text-xs">เบิกจ่ายแล้ว</p>
-                    <p class="text-2xl font-bold">${totalS.toLocaleString()} <span class="text-sm font-normal">ล้าน</span></p>
-                </div>
-                <div class="data-card p-6 border-b-4 border-orange-600">
-                    <p class="text-gray-500 text-xs">ภาพรวมจังหวัด</p>
-                    <p class="text-2xl font-bold text-orange-600">${totalP}%</p>
-                </div>`;
-            document.getElementById('table-body').innerHTML = html;
-        }
+				<li class="nav-item">
+				  <a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904" class="nav-link ">	
+					<i class="nav-icon fas fa-angle-right"></i>
+					<p>งบประจำ<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
 
-        window.onload = loadData;
-    </script>
+				<li class="nav-item">
+				  <a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904" class="nav-link ">	
+					<i class="nav-icon fas fa-angle-right"></i>					  
+					<p>งบลงทุน<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
+			
+
+            <li class="nav-item">   
+				<a href="frmOBTmain.php?KpiMonth=6904" target="myiframe" class="nav-link ">
+				<!--a href="frmRptmain_total.php?bgGroup=1&MinistryID=75&KpiMonth=6904" class="nav-link"-->	
+                <i class="nav-icon fas fas fa-wallet"></i>	
+				<p>เงินอุดหนุนเฉพาะกิจ<span class="right badge badge-danger"></span></p>
+				</a>
+			</li>
+			
+            <li class="nav-item">   
+				<a href="frmCenterMain.php?FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904" class="nav-link ">
+                <i class="nav-icon fas fas fa-wallet"></i>				
+				<p>เงินกันไว้เบิกเหลื่อมปี<span class="right badge badge-danger"></span></p>
+				</a>
+			</li>
+
+				<li class="nav-item">
+				  <a href="frmCenterMain.php?FundNameGrp=รายจ่ายประจำ&KpiMonth=6904" class="nav-link ">
+					<i class="nav-icon fas fa-angle-right"></i>
+					<p>งบประจำ<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
+
+				<li class="nav-item">
+				  <a href="frmCenterMain.php?FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904" class="nav-link ">
+					<i class="nav-icon fas fa-angle-right"></i>					  
+					<p>งบลงทุน<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
+
+            <li class="nav-item">   
+				<a href="frmLoanMain.php?FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904" class="nav-link ">
+                <i class="nav-icon fas fas fa-wallet"></i>				
+				<p>เงินกู้ COVID 19<span class="right badge badge-danger"></span></p>
+				</a>
+			</li>
+
+				<li class="nav-item">
+				  <a href="frmLoanMain.php?FundNameGrp=รายจ่ายประจำ&KpiMonth=6904" class="nav-link ">
+					<i class="nav-icon fas fa-angle-right"></i>
+					<p>งบประจำ<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>
+
+				<li class="nav-item">
+				  <a href="frmLoanMain.php?FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904" class="nav-link ">
+					<i class="nav-icon fas fa-angle-right"></i>					  
+					<p>งบลงทุน<span class="right badge badge-danger"></span></p>
+				  </a>
+				</li>						
+			
+            <!--li class="nav-item">   
+				<a href="frmDownload.php?KpiMonth=6904" target="myiframe" class="nav-link">
+                <i class="nav-icon fas fas fa-download"></i>				
+				<p>Download<span class="right badge badge-danger"></span></p>
+				</a>
+			</li-->			
+          </ul>
+        </nav>
+
+        <!-- /.sidebar-menu -->
+
+      </div>
+
+      <!-- /.sidebar -->
+
+    </aside>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!--iframe name="myiframe" src="frmDashboard2.php" style="height: 120vh" width="100%" frameborder="0"></iframe-->
+		<!-- Content Header (Page header) -->
+		<div class="content-header" style="text-align: center;">
+			<div class="container-fluid">
+				<div class="row">
+					<div class="col-sm-12">	
+								
+					  <h5 class="m-0" style="color:MidnightBlue; text-shadow:1px 1px 0 #b4c8fa">ระบบติดตามสถานะการใช้จ่ายเงินงบประมาณของจังหวัดอุบลราชธานี</h5>
+					  <h6 class="m-0" style="color:DarkTurquoise; text-shadow:1px 1px 0 #b4c8fa">Ubon Ratchathani Budget Plus : UBN Budget Plus</h6>
+					  <!--div align="center"><font color="#0066ff">ข้อมูล ณ วันที่ 22-05-2563</font></div-->			
+					</div><!-- /.col -->
+				</div><!-- /.row -->
+			</div><!-- /.container-fluid -->
+		</div>
+		<!-- /.content-header -->
+
+
+
+
+		<!-- Main content -->
+		<section class="content">
+        <div class="container-fluid">
+          <!-- Info boxes -->        
+			<div class="container">
+			
+								<div class="info-box-content">				
+					<div class="d-flex justify-content-center">
+						<!--a href="https://docs.google.com/forms/d/1_PT9aWiw1B0hyyA1wKo54gm3xSwDqXEIg7cMZVOBiiA">												
+						<span class="text-warning" style="font-size: 1rem;">
+						<i class="fas fa-star"></i>
+						<i class="fas fa-star"></i>
+						<i class="fas fa-star"></i>
+						<i class="fas fa-star"></i>
+						<i class="fas fa-star"></i></span>
+						<span class="badge badge-primary" style="font-size: 0.9rem;"> ประเมินความพึงพอใจ</span></a-->											
+						<input name="rating" value="0" id="rating_star" type="hidden" postID="1" />	<span class="badge badge-primary" style="font-size: 0.9rem;">  ประเมินความพึงพอใจ</span>					
+					</div>
+					<div class="d-flex justify-content-center">
+						<div style="font-size: 14px;margin-top: 5px;color: #8e8d8d;">
+								(คะแนนเฉลี่ย <span id="avgrat">4.1</span>
+								จากการให้คะแนน <span id="totalrat">2055</span>  ครั้ง)</span>
+						</div>	
+					</div>
+				</div>
+								
+				
+				
+				<div class="row pt-3">
+					<div class="col-12 col-sm-6 col-md-4">			
+						  <div class="info-box" style="height: 355px;">											
+							<div class="info-box-content">											
+								<div class="d-flex justify-content-center"><img src="images/budget01_200x.png" width="200" height="200"/></div>
+								<table class="table table-hover table-sm" style="border:hidden;font-size:20px;text-align: right;">  
+								  <thead>
+									<tr style="border:hidden;"> 									  
+									  <td width="50%"></td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">เบิกจ่าย</td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">ใช้จ่าย</td>									 								  
+									</tr>
+								  </thead>
+								  <tbody>
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904">งบภาพรวม </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge bg-danger'>54.65 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge bg-success'>71.81 %</span></a></td>										  
+									</tr>
+									<tr style="border:hidden">								
+									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904">งบประจำ </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge bg-success'>72.29 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge bg-success'>72.70 %</span></a></td>									
+									</tr> 
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904">งบลงทุน </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge bg-danger'>39.07 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=1&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge bg-success'>71.02 %</span></a></td>										
+									</tr> 									
+								  </tbody>
+								</table>
+							</div>			
+						  </div>	
+					</div>
+
+					<div class="col-12 col-sm-6 col-md-4">			
+						  <div class="info-box" style="height: 355px;">						
+							<div class="info-box-content">						
+								<div class="d-flex justify-content-center"><img src="images/budget02_200x.png" width="200" height="200"/></div>
+								<table class="table table-hover table-sm" style="border:hidden;font-size:20px;text-align: right;">  
+								  <thead>
+									<tr style="border:hidden;"> 									  
+									  <td width="50%"></td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">เบิกจ่าย</td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">ใช้จ่าย</td>									 								  
+									</tr>
+								  </thead>
+								  <tbody>
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904">งบภาพรวม </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge bg-danger'>17.30 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge bg-danger'>50.61 %</span></a></td>										  
+									</tr>
+									<tr style="border:hidden">								
+									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904">งบประจำ </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge bg-danger'>26.62 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge bg-danger'>26.96 %</span></a></td>									
+									</tr> 
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904">งบลงทุน </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge bg-danger'>15.97 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=2&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge bg-danger'>53.98 %</span></a></td>										
+									</tr> 									
+								  </tbody>
+								</table>																
+							</div>		
+						  </div>		
+					</div>     
+
+					<div class="col-12 col-sm-6 col-md-4">				
+						  <div class="info-box" style="height: 355px;">					  
+							<div class="info-box-content">				
+								<div class="d-flex justify-content-center"><img src="images/budget03_200x.png" width="200" height="200"/></div>
+								<table class="table table-hover table-sm" style="border:hidden;font-size:20px;text-align: right;">  
+								  <thead>
+									<tr style="border:hidden;"> 									  
+									  <td width="50%"></td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">เบิกจ่าย</td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">ใช้จ่าย</td>									 								  
+									</tr>
+								  </thead>
+								  <tbody>
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904">งบภาพรวม </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge bg-danger'>7.82 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge bg-danger'>63.61 %</span></a></td>										  
+									</tr>
+									<tr style="border:hidden">								
+									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904">งบประจำ </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge bg-danger'>29.83 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge bg-danger'>31.08 %</span></a></td>									
+									</tr> 
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904">งบลงทุน </a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge bg-danger'>3.33 %</span></a></td>
+									  <td width="15%"><a href="frmRptmain_total.php?bgGroup=3&FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge bg-success'>70.26 %</span></a></td>										
+									</tr> 									
+								  </tbody>
+								</table>
+							</div>
+						  </div>
+					</div> 
+
+					<div class="col-12 col-sm-6 col-md-4">			
+						  <div class="info-box" style="height: 355px;">					  
+							<div class="info-box-content">				
+								<div class="d-flex justify-content-center"><img src="images/budget04_200x.png" width="200" height="200"/></div>
+								<table class="table table-hover table-sm" style="border:hidden;font-size:20px;text-align: right;">  
+								  <thead>
+									<tr style="border:hidden;"> 									  
+									  <td width="50%"></td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">เบิกจ่าย</td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">ใช้จ่าย</td>									 								  
+									</tr>
+								  </thead>
+								  <tbody>
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmOBTmain.php?KpiMonth=6904">อปท. </a></td>
+									  <td width="15%"><a href="frmOBTmain.php?KpiMonth=6904"><span class='badge bg-danger'>5.46 %</span></a></td>
+									  <td width="15%"><a href="frmOBTmain.php?KpiMonth=6904"><span class='badge bg-danger'>5.46 %</span></a></td>										 
+									  <td><a href="frmFctrStatusMain.php?bgGroup=4&KpiMonth=6904"><span title="ความคืบหน้าโครงการ"><i class="far fa-calendar-alt" style="color:#007BFF;"></span></i></a></td>
+									</tr>
+									<tr style="border:hidden">	
+									  <td class="text-center" colspan="3" width="100%">
+										
+									  </td>									  
+									</tr> 									
+								  </tbody>
+								</table>								
+							
+								<!--a href="frmRptmain_total.php?bgGroup=1&MinistryID=75&KpiMonth=6904	"><h5 class="text-center">อปท.(เงินอุดหนุนเฉพาะกิจ)</h5></a-->									
+							</div>
+						  </div>
+					</div>  
+
+					<div class="col-12 col-sm-6 col-md-4">				
+						  <div class="info-box" style="height: 355px;">					  
+							<div class="info-box-content">				
+								<div class="d-flex justify-content-center"><img src="images/budget05_200x.png" width="200" height="200"/></div>
+								<table class="table table-hover table-sm" style="border:hidden;font-size:20px;text-align: right;">  
+								  <thead>
+									<tr style="border:hidden;"> 									  
+									  <td width="50%"></td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">เบิกจ่าย</td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive"></td>									 								  
+									</tr>
+								  </thead>
+								  <tbody>
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmCenterMain.php?FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904">งบภาพรวม </a></td>
+									  <td width="15%"><a href="frmCenterMain.php?FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge badge-info'>69.88 %</span></a></td>
+									  <td width="15%"></td>										  
+									</tr>
+									<tr style="border:hidden">	
+									  <td width="50%"><a href="frmCenterMain.php?FundNameGrp=รายจ่ายประจำ&KpiMonth=6904">งบประจำ </a></td>
+									  <td width="15%"><a href="frmCenterMain.php?FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge badge-info'>98.76 %</span></a></td>
+									  <td width="15%"></td>									
+									</tr> 
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmCenterMain.php?FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904">งบลงทุน </a></td>
+									  <td width="15%"><a href="frmCenterMain.php?FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge badge-info'>77.22 %</span></a></td>
+									  <td width="15%"></td>										
+									</tr> 									
+								  </tbody>
+								</table>
+							</div>
+						  </div>
+					</div> 			
+
+				   <div class="col-12 col-sm-6 col-md-4">				
+						  <div class="info-box" style="height: 355px;">					  
+							<div class="info-box-content">				
+								<div class="d-flex justify-content-center"><img src="images/budget06_200x.png" width="200" height="200"/></div>
+								<table class="table table-hover table-sm" style="border:hidden;font-size:20px;text-align: right;">  
+								  <thead>
+									<tr style="border:hidden;"> 									  
+									  <td width="50%"></td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive">เบิกจ่าย</td>
+									  <td width="15%" style="border:hidden;font-size:16px;text-align:center;color:Olive"></td>									 								  
+									</tr>
+								  </thead>
+								  <tbody>
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmLoanMain.php?FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904">งบภาพรวม </a></td>
+									  <td width="15%"><a href="frmLoanMain.php?FundNameGrp=รายจ่ายภาพรวม&KpiMonth=6904"><span class='badge badge-info'>98.69 %</span></a></td>
+									  <td width="15%"></td>										  
+									</tr>
+									<tr style="border:hidden">	
+									  <td width="50%"><a href="frmLoanMain.php?FundNameGrp=รายจ่ายประจำ&KpiMonth=6904">งบประจำ </a></td>
+									  <td width="15%"><a href="frmLoanMain.php?FundNameGrp=รายจ่ายประจำ&KpiMonth=6904"><span class='badge badge-info'>99.67 %</span></a></td>
+									  <td width="15%"></td>									
+									</tr> 
+									<tr style="border:hidden">									  
+									  <td width="50%"><a href="frmLoanMain.php?FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904">งบลงทุน </a></td>
+									  <td width="15%"><a href="frmLoanMain.php?FundNameGrp=รายจ่ายลงทุน&KpiMonth=6904"><span class='badge badge-info'>97.50 %</span></a></td>
+									  <td width="15%"></td>										
+									</tr> 									
+								  </tbody>
+								</table>
+							</div>
+						  </div>
+					</div> 		
+						
+				</div>
+
+				<div class="row">
+					<div class="col-12 col-sm-6 col-md-12">
+					  <div class="card" style="height: 305px;">
+						<div class="card-header">
+						  <h5 class="card-title">สถิติการเข้าชม</h5>
+						  <div class="card-tools">
+							<button type="button" class="btn btn-tool" data-card-widget="collapse">
+							  <i class="fas fa-minus"></i>
+							</button>
+							<button type="button" class="btn btn-tool" data-card-widget="remove">
+							  <i class="fas fa-times"></i>
+							</button>
+						  </div>
+						</div>
+
+						<!-- /.card-header -->
+						<div class="card-body">
+						  <div class="row">
+							<!-- /.col -->
+							<div class="col-md-12">
+							  <p class="text-center">
+								<strong>จำนวนผู้เข้าชม</strong>
+							  </p>
+
+							  <div class="progress-group">
+									ผู้เข้าชมทั้งหมด
+								<span class="float-right"><span id="numAll">0</span></span>
+								<div class="progress progress-sm">
+								  <div id="c_numAll" class="progress-bar bg-primary" style="width: 80%"></div>
+								</div>
+							  </div>
+							  <!-- /.progress-group -->
+
+							  <div class="progress-group">
+									ผู้เข้าชมเดือนที่แล้ว
+								<span class="float-right"><span id="numMonth">0</span></span>
+								<div class="progress progress-sm">
+								  <div id="c_numMonth" class="progress-bar bg-danger" style="width: 80%"></div>
+								</div>
+							  </div>
+
+							  <!-- /.progress-group -->
+							  <div class="progress-group">
+									ผู้เข้าชมอาทิตย์นี้
+								<span class="float-right"><span id="numWeek">0</span></span>
+								<div class="progress progress-sm">
+								  <div id="c_numWeek" class="progress-bar bg-warning" style="width: 20%"></div>
+								</div>
+							  </div>
+
+							  <!-- /.progress-group -->
+							  <div class="progress-group">
+								<span class="progress-text">Online ทั้งหมด</span>
+								<span class="float-right"><span id="numDay">0</span></span>
+								<div class="progress progress-sm">
+								  <div id="c_numDay" class="progress-bar bg-success" style="width: 2%"></div>
+								</div>
+							  </div>
+
+							  <!-- /.progress-group -->
+							</div>
+							<!-- /.col -->
+						  </div>
+						  <!-- /.row -->
+						</div>
+						<!-- ./card-body --><!-- /.card-footer -->
+					  </div>
+					  <!-- /.card -->
+					</div>
+					<!-- /.col -->
+				</div>
+				<!-- /.row -->
+			</div><!--/. container-fluid -->
+		 </div>
+
+		</section>
+		<!-- /.content -->		  
+    <!-- /.content-wrapper -->
+
+    <!-- Main Footer -->
+    <footer class="main-footer">      
+	  <strong>Copyright &copy; 2020 <a href="#">Ubon Ratchathani City</a>.</strong> E-Mail UBN@CGD.GO.TH      <div class="float-right d-none d-sm-inline-block">
+        <b>Version</b> 3.0.2      </div>
+    </footer>
+  </div>
+
+	    <!-- Main Footer -->
+    <footer class="main-footer d-none d-sm-block">      
+	  <strong>Copyright &copy; 2020 <a href="#">Ubon Ratchathani City</a>.</strong> E-Mail UBN@CGD.GO.TH      <div class="float-right d-none d-sm-inline-block">
+        <b>Version</b> 3.0.2      </div>
+    </footer>
+  <!-- Login -->
+	<div class="form-popup" id="myForm">
+      <div class="form-container">    
+        <label for="email"><b>Username</b></label>
+        <input type="text" placeholder="Username" id="txt_username" name="txt_username" required>    
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" id="txt_password" name="txt_password" required>    
+        <button type="submit" class="btn" onclick="return Login();">Login</button>
+        <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+      </div>
+    </div>		
+	<!-- Comment -->
+	<div id="myModalC" class="modalC">    
+	  <!-- Modal content -->
+	  <div class="modalC-content">
+		<span class="close" onclick="closePopupcomment()">&times;</span>        
+		<!--iframe name="myIframe" id="myIframe" src="" width="100%" height="800px" frameborder="0"></iframe-->        
+	  </div>    
+	</div>			
+  </div>
+  <!-- REQUIRED SCRIPTS -->
+<!-- jQuery -->
+<script src="plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- overlayScrollbars -->
+<script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+<!-- DataTables -->
+<script src="plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<!-- AdminLTE App -->
+<script src="dist/js/adminlte.js"></script>
+<!-- Bootstrap 4 -->
+<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="plugins/sweetalert2/sweetalert2.min.js"></script>
+
+<!-- OPTIONAL SCRIPTS -->
+<!--script src="dist/js/demo.js"></script-->
+
+<!-- PAGE PLUGINS -->
+<!-- jQuery Mapael -->
+<script src="plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
+<script src="plugins/raphael/raphael.min.js"></script>
+<script src="plugins/jquery-mapael/jquery.mapael.min.js"></script>
+<script src="plugins/jquery-mapael/maps/usa_states.min.js"></script>
+<!-- ChartJS -->
+<script src="plugins/chart.js/Chart.min.js"></script>
+
+<!-- PAGE SCRIPTS -->
+<!--script src="dist/js/pages/dashboard2.js"></script-->
+
+<script language="javascript">  	  
+	function logut(){
+	  $.post("code/c_Login.php", { Tlogout: '1' }, 
+		function(result){
+			//alert(result);
+			setTimeout("top.document.location='index.php'",0000);	
+		}
+	);
+	}
+
+	function openForm() {
+	  document.getElementById("myForm").style.display = "block";
+	}
+
+	function closeForm() {
+	  document.getElementById("myForm").style.display = "none";
+	}
+</script>
+
+<script>
+  function Countter(){
+    $.post("code/c_Countter.php",
+		function (result) {
+		var data = JSON.parse(result);
+		var Numall = data[0].NumAll;
+		var Numy = data[0].NumY;
+		var Numday = data[0].NumDay;
+
+			document.getElementById("T_numall").innerHTML = Numall;
+			document.getElementById("T_numy").innerHTML = Numy;
+			document.getElementById("T_numday").innerHTML = Numday;
+		});
+  }
+
+  function Useronline(){
+    $.post("code/c_Useronline.php",
+		function (result) {
+      //alert(reset);
+    });
+  }
+
+  //Useronline();
+  //Countter();  
+  	var cklogin = "";
+	//Exprot to Excel
+	$("#btnExcel").click(function (e) {		
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('#Mydata1').html()));
+			e.preventDefault();
+		//}		
+	});
+
+	$("#btnExcel2").click(function (e) {		
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			window.open('data:application/vnd.ms-excel,' + encodeURIComponent($('#Mydata2').html()));
+			e.preventDefault();
+		//}		
+	});	
+	
+	//Exprot to Word
+	$("#btnWord").click(function (e) {
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			window.open('data:application/msword,' + encodeURIComponent($('#Mydata1').html()));
+			e.preventDefault();
+		//}
+	});
+
+	$("#btnWord2").click(function (e) {
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			window.open('data:application/msword,' + encodeURIComponent($('#Mydata2').html()));
+			e.preventDefault();
+		//}
+	});	
+	
+	//Exprot to PPT
+	$("#btnPPT").click(function (e) {
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			window.open('data:application/vnd.ms-powerpoint,' + encodeURIComponent($('#Mydata1').html()));
+			e.preventDefault();
+		//}
+	});
+
+	$("#btnPPT2").click(function (e) {
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			window.open('data:application/vnd.ms-powerpoint,' + encodeURIComponent($('#Mydata2').html()));
+			e.preventDefault();
+		//}
+	});	
+	
+	//Exprot to PDF
+	$("#btnPDF").click(function (e) {
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			createPDF();
+		//}
+	});
+	
+	$("#btnPDF2").click(function (e) {
+		//if(cklogin == ""){
+		//	alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+		//}else{
+			createPDF2();
+		//}
+	});		
+	
+	function createPDF() {
+        var sTable = document.getElementById('Mydata1').innerHTML;
+
+        var style = "<style>";
+        style = style + "table {width: 100%;font: 17px Calibri;}";
+        style = style + "table, th, td {border: solid 1px #DDD; border-collapse: collapse;";
+        style = style + "padding: 2px 3px;text-align: center;}";
+        style = style + "</style>";
+
+        // CREATE A WINDOW OBJECT.
+        var win = window.open('', '', 'height=700,width=700');
+        win.document.write('<html><head>');
+        win.document.write(style);          // ADD STYLE INSIDE THE HEAD TAG.
+        win.document.write('<//head>');
+        win.document.write('<body>');
+        win.document.write(sTable);         // THE TABLE CONTENTS INSIDE THE BODY TAG.
+        win.document.write('<//body><//html>');
+
+        win.document.close(); 	// CLOSE THE CURRENT WINDOW.
+
+        win.print();    // PRINT THE CONTENTS.
+    }
+
+	function createPDF2() {
+        var sTable = document.getElementById('Mydata2').innerHTML;
+
+        var style = "<style>";
+        style = style + "table {width: 100%;font: 17px Calibri;}";
+        style = style + "table, th, td {border: solid 1px #DDD; border-collapse: collapse;";
+        style = style + "padding: 2px 3px;text-align: center;}";
+        style = style + "</style>";
+
+        // CREATE A WINDOW OBJECT.
+        var win = window.open('', '', 'height=700,width=700');
+        win.document.write('<html><head>');
+        win.document.write(style);          // ADD STYLE INSIDE THE HEAD TAG.
+        win.document.write('<//head>');
+        win.document.write('<body>');
+        win.document.write(sTable);         // THE TABLE CONTENTS INSIDE THE BODY TAG.
+        win.document.write('<//body><//html>');
+
+        win.document.close(); 	// CLOSE THE CURRENT WINDOW.
+
+        win.print();    // PRINT THE CONTENTS.
+    }	
+	
+  </script>  
+  
+<script>
+var modalC = document.getElementById("myModalC");
+var btnC = document.getElementById("myBtnC");
+var spanC = document.getElementsByClassName("close")[0];
+var modalS = document.getElementById("myModalS");
+/*
+btnC.onclick = function() {
+  modal.style.display = "block";
+}
+
+spanC.onclick = function() {
+  modal.style.display = "none";
+}
+
+window.onclick = function(event) {
+  if (event.target == modalC) {
+    modalC.style.display = "none";
+  }
+}
+*/
+function closePopupcomment(){	
+	var modalC = document.getElementById("myModalC");
+	modalC.style.display = "none";		
+}
+
+function openPopupcomment(companyID, conpanyName, Fctr){
+	var strType = "";
+	if(cklogin == ""){
+		alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+	}else if(cklogin != companyID && strType != "Admin"){
+		alert("คุณไม่สามารถบันทึกข้อมูลของหน่วยงานอื่นได้!");
+	}else{
+		var modalC = document.getElementById("myModalC");
+		modalC.style.display = "block";	
+		
+		var myiframe = document.getElementById("myIframe");
+		myiframe.src = "frmComment.php?companyID="+companyID+"&companyName="+conpanyName+"&Fctr="+Fctr;
+	}	
+}
+
+function closePopupStatus(){	
+	var modalS = document.getElementById("myModalS");	
+	modalS.style.display = "none";
+	location.reload();	
+}
+
+function closePopupStatusCen(){	
+	var modalS = document.getElementById("myModalSCen");	
+	modalS.style.display = "none";
+	location.reload();	
+}
+
+function openPopupStatus(companyID, conpanyName, Fctr){	
+	var strType = "";
+	if(cklogin == ""){
+		alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+	}else if(cklogin != companyID && strType != "Admin"){
+		alert("คุณไม่สามารถบันทึกข้อมูลของหน่วยงานอื่นได้!");
+	}else{
+		var modalS = document.getElementById("myModalS");
+		modalS.style.display = "block";	
+		
+		var myiframeS = document.getElementById("myIframeS");
+		myiframeS.src = "frmFctrStatus.php?companyID="+companyID+"&companyName="+conpanyName+"&Fctr="+Fctr;
+	}	
+}
+
+function openPopupStatusCen(companyID, conpanyName, Fctr){	
+	var strType = "";
+	if(cklogin == ""){
+		alert("กรุณาทำการล็อกอินเข้าสู่ระบบด้วย !");
+	}else if(cklogin != companyID && strType != "Admin"){
+		alert("คุณไม่สามารถบันทึกข้อมูลของหน่วยงานอื่นได้!");
+	}else{
+		var modalS = document.getElementById("myModalSCen");
+		modalS.style.display = "block";	
+		
+		var myiframeS = document.getElementById("myIframeS");
+		myiframeS.src = "frmFctrStatusCen.php?companyID="+companyID+"&companyName="+conpanyName+"&Fctr="+Fctr;
+	}	
+}
+</script>
 </body>
 </html>
+
+<script type="text/javascript" src="js/j_Countter.js?v=1.1.1"></script>
+<script type="text/javascript" src="js/rating.js"></script>
+<script language="javascript" type="text/javascript">
+
+	$(function() {
+		$("#rating_star").codexworld_rating_widget({
+			starLength: '5',
+			initialValue: '',
+			callbackFunctionName: 'processRating',
+			imageDirectory: 'images/',
+			inputAttr: 'postID'
+		});
+	});
+
+	function processRating(val, attrVal){
+		$.ajax({
+			type: 'POST',
+			url: 'rating.php',
+			data: 'postID='+attrVal+'&ratingPoints='+val,
+			dataType: 'json',
+			success : function(data) {
+				if (data.status == 'ok') {
+					alert('คุณให้คะแนน '+val+'');
+					$('#avgrat').text(data.average_rating);
+					$('#totalrat').text(data.rating_number);
+				}else{
+					alert('Some problem occured, please try again.');
+				}
+			}
+		});
+	}
+</script>
