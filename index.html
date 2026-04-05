@@ -3,131 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACR Budget Dashboard - Amnat Charoen</title>
+    <title>ACR Budget Dashboard - Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
-        .stat-card { transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-5px); }
+        body { font-family: 'Kanit', sans-serif; background-color: #f1f5f9; }
+        .data-card { background: white; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen pb-10">
 
-    <nav class="bg-blue-900 text-white shadow-lg mb-8">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <nav class="bg-[#1e3a8a] text-white p-6 shadow-md mb-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div>
-                <h1 class="text-xl md:text-2xl font-bold tracking-wide">ACR BUDGET PLUS</h1>
-                <p class="text-blue-200 text-xs md:text-sm">จังหวัดอำนาจเจริญ | ข้อมูลสดจากระบบงบประมาณ</p>
+                <h1 class="text-2xl font-bold">ACR BUDGET PLUS</h1>
+                <p class="text-blue-200 text-sm">Dashboard ติดตามงบประมาณ (ฉบับแก้ไขระบบดึงข้อมูล)</p>
             </div>
-            <button onclick="loadBudgetData()" class="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-full text-sm flex items-center gap-2 transition shadow-md">
-                <span>🔄</span> รีเฟรชข้อมูล
+            <button onclick="loadData()" class="bg-blue-600 hover:bg-blue-500 px-5 py-2 rounded-lg text-sm transition">
+                🔄 รีเฟรชข้อมูล
             </button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 md:px-6 pb-12">
-        <div id="summary-section" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="animate-pulse bg-white h-32 rounded-2xl shadow-sm border border-slate-200"></div>
-            <div class="animate-pulse bg-white h-32 rounded-2xl shadow-sm border border-slate-200"></div>
-            <div class="animate-pulse bg-white h-32 rounded-2xl shadow-sm border border-slate-200"></div>
+    <div class="max-w-7xl mx-auto px-4">
+        <div id="summary" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 text-center">
+            <div class="data-card p-6 border-b-4 border-blue-600 italic text-gray-400">กำลังโหลดข้อมูล...</div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                <h2 class="font-bold text-slate-800 text-lg">📊 รายละเอียดการเบิกจ่ายรายหน่วยงาน</h2>
-                <span class="text-xs text-slate-400">อัปเดตล่าสุด: <span id="last-update">-</span></span>
+        <div class="data-card overflow-hidden">
+            <div class="p-5 border-b font-bold text-lg text-gray-800 bg-gray-50">
+                📊 รายงานการเบิกจ่ายรายหน่วยงาน
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
-                    <thead class="bg-slate-50 text-slate-600 text-sm uppercase">
+                    <thead class="bg-gray-100 text-gray-600 text-sm">
                         <tr>
-                            <th class="px-6 py-4 font-semibold">ชื่อหน่วยงาน</th>
-                            <th class="px-6 py-4 font-semibold text-right">งบประมาณ (ล้าน)</th>
-                            <th class="px-6 py-4 font-semibold text-right">เบิกจ่ายแล้ว (ล้าน)</th>
-                            <th class="px-6 py-4 font-semibold text-center">ความก้าวหน้า</th>
+                            <th class="p-4">หน่วยงาน</th>
+                            <th class="p-4 text-right">งบประมาณ (ล้าน)</th>
+                            <th class="p-4 text-right">เบิกจ่าย (ล้าน)</th>
+                            <th class="p-4 text-center">ร้อยละ</th>
                         </tr>
                     </thead>
-                    <tbody id="budget-table-body" class="divide-y divide-slate-100 text-slate-700"></tbody>
+                    <tbody id="table-body" class="divide-y">
+                        </tbody>
                 </table>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        const SHEET_ID = '1InruqYSLdiuIYZNUbiNqzioHTvUwoH5Tz2jTCFjPjnE';
-        const GID = '391006169'; 
-        const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+        const CSV_URL = 'https://docs.google.com/spreadsheets/d/1InruqYSLdiuIYZNUbiNqzioHTvUwoH5Tz2jTCFjPjnE/export?format=csv&gid=391006169';
 
-        async function loadBudgetData() {
+        async function loadData() {
             try {
-                const response = await fetch(CSV_URL);
-                const csvText = await response.text();
-                const rows = csvText.split('\n').map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
+                const res = await fetch(CSV_URL);
+                const text = await res.text();
+                const rows = text.split('\n').map(r => r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
 
-                // ค้นหาแถวที่มีคำว่า "หน่วยงาน" เพื่อเริ่มดึงข้อมูลจากจุดนั้น
-                const headerIndex = rows.findIndex(r => r[0] && r[0].includes("หน่วยงาน"));
-                if (headerIndex === -1) throw new Error("ไม่พบหัวตารางในไฟล์ Google Sheets");
+                // ค้นหาบรรทัดที่มีข้อมูลจริง (หาคำว่า "หน่วยงาน")
+                const startIndex = rows.findIndex(r => r[0] && r[0].includes("หน่วยงาน"));
+                
+                if (startIndex === -1) {
+                    document.getElementById('summary').innerHTML = "<div class='col-span-3 text-red-500 p-10'>ไม่พบหัวตาราง 'หน่วยงาน' ใน Google Sheets ของคุณ</div>";
+                    return;
+                }
 
-                const dataRows = rows.slice(headerIndex + 1).filter(r => {
+                // ดึงเฉพาะแถวข้อมูล (ข้ามหัวตารางไป 1 บรรทัด)
+                const cleanData = rows.slice(startIndex + 1).filter(r => {
                     const name = r[0] ? r[0].replace(/"/g, '').trim() : "";
-                    // ข้ามแถวที่เป็นสรุปผลรวมหรือค่าว่าง
-                    return name !== "" && !name.includes("Grand Total") && !name.includes("อำนาจเจริญ");
+                    return name !== "" && !name.includes("Grand Total") && !name.includes("รายงาน");
                 });
 
-                renderDashboard(dataRows);
-                document.getElementById('last-update').innerText = new Date().toLocaleTimeString('th-TH');
-            } catch (error) {
-                console.error(error);
-                alert("เกิดข้อผิดพลาด: " + error.message);
+                render(cleanData);
+            } catch (e) {
+                alert("เกิดข้อผิดพลาดในการดึงข้อมูล");
             }
         }
 
-        function renderDashboard(data) {
-            const tableBody = document.getElementById('budget-table-body');
-            const summarySection = document.getElementById('summary-section');
-            
-            let totalBudget = 0, totalSpent = 0, tableHTML = "";
+        function render(data) {
+            let totalB = 0, totalS = 0, html = "";
+            const clean = (v) => parseFloat(String(v).replace(/[",]/g, '')) || 0;
 
-            data.forEach(row => {
-                const cleanNum = (val) => {
-                    if (!val) return 0;
-                    let n = parseFloat(String(val).replace(/[",]/g, ''));
-                    return isNaN(n) ? 0 : n;
-                };
-                
-                const name = row[0].replace(/"/g, '').trim();
-                const budget = cleanNum(row[1]);
-                const spent = cleanNum(row[2]);
-                const percent = budget > 0 ? ((spent / budget) * 100).toFixed(2) : 0;
+            data.forEach(r => {
+                const name = r[0].replace(/"/g, '').trim();
+                const b = clean(r[1]);
+                const s = clean(r[2]);
+                const p = b > 0 ? ((s/b)*100).toFixed(2) : 0;
 
-                totalBudget += budget;
-                totalSpent += spent;
-
-                tableHTML += `
-                    <tr class="hover:bg-blue-50/50 transition">
-                        <td class="px-6 py-4 font-medium text-slate-800">${name}</td>
-                        <td class="px-6 py-4 text-right text-blue-700 font-semibold">${budget.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                        <td class="px-6 py-4 text-right text-emerald-600 font-semibold">${spent.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                        <td class="px-6 py-4">
-                            <div class="w-full bg-slate-200 rounded-full h-2.5 mb-1">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: ${Math.min(percent, 100)}%"></div>
-                            </div>
-                            <div class="text-center text-xs font-bold text-slate-500">${percent}%</div>
-                        </td>
+                totalB += b; totalS += s;
+                html += `
+                    <tr class="hover:bg-blue-50">
+                        <td class="p-4 font-medium">${name}</td>
+                        <td class="p-4 text-right text-blue-800">${b.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+                        <td class="p-4 text-right text-green-700">${s.toLocaleString(undefined,{minimumFractionDigits:2})}</td>
+                        <td class="p-4 text-center font-bold ${p > 50 ? 'text-green-600' : 'text-orange-500'}">${p}%</td>
                     </tr>`;
             });
 
-            const totalPercent = totalBudget > 0 ? ((totalSpent / totalBudget) * 100).toFixed(2) : 0;
+            const totalP = totalB > 0 ? ((totalS/totalB)*100).toFixed(2) : 0;
 
-            summarySection.innerHTML = `
-                <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-blue-600">
-                    <p class="text-slate-500 text-sm mb-1">งบประมาณรวมทั้งสิ้น</p>
-                    <h3 class="text-3xl font-bold text-slate-800">${totalBudget.toLocaleString(undefined, {minimumFractionDigits: 2})} <span class="text-sm font-normal">ล้านบาท</span></h3>
+            document.getElementById('summary').innerHTML = `
+                <div class="data-card p-6 border-b-4 border-blue-600">
+                    <p class="text-gray-500 text-xs">งบประมาณรวม</p>
+                    <p class="text-2xl font-bold">${totalB.toLocaleString()} <span class="text-sm font-normal">ล้าน</span></p>
                 </div>
-                <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-emerald-500">
-                    <p class="text-slate-500 text-sm mb-1">เบิกจ่ายแล้ว</p>
-                    <h3 class="text-3xl font-bold text-emerald-600">${totalSpent.toLocaleString(undefined, {minimumFractionDigits: 2})} <span class="text-sm font-normal">ล้านบาท</span></h3>
+                <div class="data-card p-6 border-b-4 border-green-600">
+                    <p class="text-gray-500 text-xs">เบิกจ่ายแล้ว</p>
+                    <p class="text-2xl font-bold">${totalS.toLocaleString()} <span class="text-sm font-normal">ล้าน</span></p>
                 </div>
-                <div class="stat-card bg-white p-6 rounded-2xl shadow-sm border-b-4 border-orange-500">
-                    <p class="text
+                <div class="data-card p-6 border-b-4 border-orange-600">
+                    <p class="text-gray-500 text-xs">ภาพรวมจังหวัด</p>
+                    <p class="text-2xl font-bold text-orange-600">${totalP}%</p>
+                </div>`;
+            document.getElementById('table-body').innerHTML = html;
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
