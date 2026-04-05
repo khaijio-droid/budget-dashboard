@@ -3,192 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ACR Budget Plus | รายงานงบประมาณจังหวัดอำนาจเจริญ</title>
+<title>ACR Budget Plus | Live from Apps Script</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root {
-    --primary:#1a3a5c; --primary2:#2563a8; --accent:#f59e0b;
-    --success:#16a34a; --warning:#ea580c; --danger:#dc2626;
-    --bg:#f0f4f8; --card:#fff; --border:#e2e8f0; --text:#0f172a; --muted:#64748b;
-  }
-  body { font-family: 'Sarabun', sans-serif; background: var(--bg); color: var(--text); }
-  .hdr { background: linear-gradient(135deg,#0f2744,#1e4d8c); color: #fff; }
-  .ccard { background: var(--card); border-radius: 1rem; border: 1px solid var(--border); transition: 0.2s; }
-  .ccard:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-  .ntab.active { color: var(--primary2); border-bottom: 3px solid var(--primary2); }
-  .qtab.active { background: var(--primary2); color: #fff; }
-  .ptr-wrap { flex: 1; position: relative; height: 6px; background: #f1f5f9; border-radius: 3px; }
-  .ptr-actual { position: absolute; top: 0; left: 0; height: 100%; border-radius: 3px; }
-  .ptr-target-line { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #1a3a5c; z-index: 2; }
-  .trk-modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: center; justify-content: center; }
-  .trk-modal-bg.open { display: flex; }
+body{font-family:'Sarabun',sans-serif;background:#f0f4f8;margin:0}
+.hdr{background:#1a3a5c;color:#fff;padding:12px 20px;display:flex;align-items:center}
+.logo{background:#f59e0b;color:#1a3a5c;font-weight:800;border-radius:10px;padding:8px 12px;margin-right:10px}
+.reload{margin-left:auto;background:#ffffff33;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer}
+#loading{padding:40px;text-align:center}
+#error{background:#fee2e2;color:#991b1b;padding:12px;border-radius:8px;display:none;margin:20px}
+pre{background:#fff;padding:12px;border-radius:8px;font-size:12px;overflow:auto}
 </style>
 </head>
-<body class="min-h-screen pb-10">
 
-<div class="hdr p-4 sticky top-0 z-50 shadow-lg">
-  <div class="max-w-7xl mx-auto flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <div class="bg-orange-500 text-white font-bold p-2 rounded-lg">อจ</div>
-      <div>
-        <h1 class="text-lg font-bold leading-tight">ACR Budget Plus</h1>
-        <p class="text-xs opacity-70">จังหวัดอำนาจเจริญ | ข้อมูลอัปเดตอัตโนมัติ</p>
-      </div>
-    </div>
-    <div class="flex items-center gap-4">
-      <div class="text-right hidden md:block">
-        <div class="text-[10px] opacity-60">อัปเดตล่าสุด</div>
-        <div id="lastUpdate" class="text-xs font-bold">กำลังโหลด...</div>
-      </div>
-      <button onclick="loadLiveData()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full text-xs font-bold transition">🔄 อัปเดต</button>
-    </div>
+<body>
+
+<div class="hdr">
+  <div class="logo">อจ</div>
+  <div>
+    <div style="font-weight:800">ACR Budget Plus</div>
+    <div style="font-size:11px;opacity:.7">จังหวัดอำนาจเจริญ | Live from Apps Script</div>
   </div>
+  <button class="reload" onclick="loadData()">🔄 โหลดใหม่</button>
 </div>
 
-<div class="bg-white border-b border-gray-200 sticky top-[72px] z-40">
-  <div class="max-w-7xl mx-auto flex overflow-x-auto px-4">
-    <button onclick="goPage('overview')" id="nt-ov" class="ntab active px-6 py-4 text-sm font-bold whitespace-nowrap">📊 ภาพรวม</button>
-    <button onclick="goPage('agencies')" id="nt-ag" class="ntab px-6 py-4 text-sm font-bold whitespace-nowrap">🏛️ หน่วยงาน</button>
-    <button onclick="goPage('invest')" id="nt-inv" class="ntab px-6 py-4 text-sm font-bold whitespace-nowrap">🏗️ งบลงทุน</button>
-    <button onclick="goPage('tracker')" id="nt-trk" class="ntab px-6 py-4 text-sm font-bold whitespace-nowrap text-orange-600">📋 ติดตามงาน</button>
-  </div>
-</div>
-
-<main class="max-w-7xl mx-auto p-4 mt-4">
-  <div id="pg-overview">
-    <div id="heroBlock" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      </div>
-    <div id="cmpGrid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      </div>
-  </div>
-
-  <div id="pg-agencies" class="hidden">
-    <div class="flex flex-wrap gap-2 mb-6">
-      <input id="srch" oninput="renderAg()" type="text" placeholder="🔍 ค้นหาหน่วยงาน..." class="flex-1 min-w-[200px] p-3 rounded-xl border border-gray-200 outline-none focus:ring-2 ring-blue-500">
-    </div>
-    <div id="agGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-  </div>
-
-  <div id="pg-invest" class="hidden">
-     <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
-        <table class="w-full text-sm text-left">
-           <thead class="bg-gray-50 border-b">
-              <tr>
-                 <th class="p-4">หน่วยงาน</th>
-                 <th class="p-4">โครงการ</th>
-                 <th class="p-4 text-right">งบประมาณ (ล้าน)</th>
-                 <th class="p-4 text-center">% เบิกจ่าย</th>
-              </tr>
-           </thead>
-           <tbody id="investTbody" class="divide-y"></tbody>
-        </table>
-     </div>
-  </div>
-
-  <div id="pg-tracker" class="hidden">
-    <div class="bg-orange-50 border border-orange-200 p-6 rounded-2xl text-center">
-       <h3 class="font-bold text-orange-800 mb-2">📋 ระบบติดตามสถานะโครงการจริง</h3>
-       <p class="text-sm text-orange-600">คุณสามารถบันทึกความคืบหน้าหน้างาน และอุปสรรคได้ที่นี่ (ข้อมูลจะเก็บไว้ในเครื่องของคุณ)</p>
-       <div id="trkTbody" class="mt-6 grid grid-cols-1 gap-4">
-          </div>
-    </div>
-  </div>
-</main>
+<div id="loading">⏳ กำลังโหลดข้อมูลจาก Apps Script...</div>
+<div id="error"></div>
 
 <script>
-// --- CONFIG & DATA ---
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyFsdXCTCD247_p3EnyiJVwmbkA1OYxLKOZ1GcqKNpOE1frTxB3AinTDKMinixYBZPlJg/exec';
+// =====================================================
+// ✅ ใช้ Web App /exec ที่คุณให้มา (ใส่ให้แล้ว)
+// =====================================================
+const WEB_APP_EXEC_URL =
+  "https://script.google.com/macros/s/AKfycbzULJzY-wPzpKasnMm_lllbsff8JLmUon8BBJ3Ybx1PkxzUM-uURlb4UtLuZGxKPJFxmA/exec";
 
-window.DATA = { summary: { a:0, s:0, p:0 }, agencies: [] };
+// state
+let DATA = null;
 
-async function loadLiveData() {
-  try {
-    const res = await fetch(APPS_SCRIPT_URL);
-    const json = await res.json();
-    if(json && json.agencies) {
-      window.DATA = json;
-      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('th-TH') + ' น.';
-      renderOverview();
-      renderAg();
-      renderInvest();
+async function loadData(){
+  document.getElementById("loading").style.display="block";
+  document.getElementById("error").style.display="none";
+
+  try{
+    const res = await fetch(WEB_APP_EXEC_URL, {
+      method: "GET",
+      redirect: "follow",
+      cache: "no-store"
+    });
+
+    if(!res.ok) throw new Error("HTTP " + res.status);
+
+    const text = await res.text();
+    let json;
+
+    try{
+      json = JSON.parse(text);
+    }catch{
+      throw new Error("Apps Script ไม่ได้ส่ง JSON");
     }
-  } catch (e) {
-    console.error("Fetch Error:", e);
-    alert("ไม่สามารถดึงข้อมูลจาก Google Sheets ได้ กรุณาตรวจสอบการเชื่อมต่อ");
+
+    if(!json.summary || !json.agencies){
+      throw new Error("JSON ต้องมี summary และ agencies");
+    }
+
+    DATA = json;
+
+    document.getElementById("loading").innerHTML =
+      "✅ โหลดข้อมูลสำเร็จจาก Apps Script<br><br>" +
+      "<strong>ตัวอย่างข้อมูล summary:</strong>" +
+      "<pre>" + JSON.stringify(DATA.summary,null,2) + "</pre>";
+
+  }catch(err){
+    document.getElementById("loading").style.display="none";
+    const el = document.getElementById("error");
+    el.style.display="block";
+    el.innerHTML =
+      "❌ โหลดข้อมูลไม่สำเร็จ<br><br>" +
+      err.message +
+      "<br><br>ถ้าเปิดลิงก์ /exec แล้วเห็น HTML แสดงว่า Apps Script ยังไม่ได้ return JSON";
   }
 }
 
-function renderOverview() {
-  const s = DATA.summary;
-  document.getElementById('heroBlock').innerHTML = `
-    <div class="ccard p-6 border-b-4 border-blue-600">
-      <div class="text-gray-500 text-xs font-bold uppercase mb-1">งบจัดสรรรวมทั้งจังหวัด</div>
-      <div class="text-3xl font-black text-blue-900">${s.a.toLocaleString()} <span class="text-sm font-normal text-gray-400">ล้าน</span></div>
-    </div>
-    <div class="ccard p-6 border-b-4 border-green-600">
-      <div class="text-gray-500 text-xs font-bold uppercase mb-1">เบิกจ่ายแล้ว</div>
-      <div class="text-3xl font-black text-green-600">${s.s.toLocaleString()} <span class="text-sm font-normal text-gray-400">ล้าน</span></div>
-    </div>
-    <div class="ccard p-6 border-b-4 border-orange-500">
-      <div class="text-gray-500 text-xs font-bold uppercase mb-1">ร้อยละการเบิกจ่าย</div>
-      <div class="text-3xl font-black text-orange-600">${s.p.toFixed(2)}%</div>
-    </div>
-  `;
-}
-
-function renderAg() {
-  const q = document.getElementById('srch').value.toLowerCase();
-  const list = DATA.agencies.filter(a => a.n.toLowerCase().includes(q));
-  
-  document.getElementById('agGrid').innerHTML = list.map(a => `
-    <div class="ccard p-5">
-      <div class="text-xs font-bold text-blue-600 mb-1">${a.g}</div>
-      <div class="font-bold text-sm mb-4 h-10 overflow-hidden line-clamp-2">${a.n}</div>
-      <div class="flex justify-between text-xs mb-1">
-        <span class="text-gray-500">เบิกจ่ายไปแล้ว</span>
-        <span class="font-bold">${a.pa.toFixed(2)}%</span>
-      </div>
-      <div class="ptr-wrap">
-        <div class="ptr-actual bg-blue-500" style="width: ${a.pa}%"></div>
-      </div>
-      <div class="mt-3 text-[10px] text-gray-400">งบประมาณ: ${a.a.toLocaleString()} ล้านบาท</div>
-    </div>
-  `).join('');
-}
-
-function renderInvest() {
-  const investRows = [];
-  DATA.agencies.forEach(a => {
-    (a.projects || []).forEach(p => {
-       investRows.push(`
-          <tr>
-            <td class="p-4 font-bold text-xs">${a.n}</td>
-            <td class="p-4 text-xs">${p.n}</td>
-            <td class="p-4 text-right font-bold text-blue-700">${p.a.toLocaleString()}</td>
-            <td class="p-4 text-center">
-               <span class="px-2 py-1 rounded-full text-[10px] font-bold ${p.p >= 50 ? 'bg-green-100 text-green-700':'bg-red-100 text-red-700'}">
-                 ${p.p.toFixed(1)}%
-               </span>
-            </td>
-          </tr>
-       `);
-    });
-  });
-  document.getElementById('investTbody').innerHTML = investRows.join('');
-}
-
-function goPage(pg) {
-  const pages = ['overview', 'agencies', 'invest', 'tracker'];
-  pages.forEach(p => {
-    document.getElementById('pg-' + p).classList.add('hidden');
-    document.getElementById('nt-' + p).classList.remove('active');
-  });
-  document.getElementById('pg-' + pg).classList.remove('hidden');
-  document.getElementById('nt-' + pg).classList.add('active');
-}
-
-window.onload = loadLiveData;
+window.onload = loadData;
 </script>
+
 </body>
 </html>
