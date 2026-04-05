@@ -86,11 +86,9 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text)}
 .sec-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase}
 .btype-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px}
 .btcard{background:var(--card);border-radius:13px;border:1px solid var(--border);padding:16px;position:relative;overflow:hidden}
-.btcard::after{content:'';position:absolute;top:0;left:0;bottom:0;width:4px;background:var(--c)}
 .btcard .bc-icon{font-size:22px;margin-bottom:8px}
 .btcard .bc-name{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:8px}
 .btcard .bc-alloc{font-size:22px;font-weight:800;line-height:1}
-.btcard .bc-alloc span{font-size:11px;font-weight:400;color:var(--muted)}
 .btcard .bc-spent{font-size:11px;color:var(--muted);margin:4px 0 10px}
 .pbar-wrap{background:#f1f5f9;border-radius:5px;height:7px}
 .pbar-fill{height:100%;border-radius:5px;background:var(--c)}
@@ -106,10 +104,6 @@ body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text)}
 
 .cmp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:14px}
 .ccard{background:var(--card);border-radius:13px;border:1px solid var(--border);overflow:hidden}
-.cc-hdr{padding:12px 15px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border)}
-.cc-title{font-size:13px;font-weight:800}
-.cc-sub{font-size:10px;color:var(--muted);margin-top:1px}
-.cc-body{padding:13px 15px}
 .gauge-row{display:flex;gap:10px;align-items:center;margin-bottom:12px}
 .gauge{position:relative;width:84px;height:84px;flex-shrink:0}
 .gauge svg{transform:rotate(-90deg)}
@@ -149,9 +143,6 @@ tbody tr{border-bottom:1px solid var(--border);cursor:pointer;transition:.15s}
 tbody tr:hover{background:#f0f7ff}
 tbody td{padding:8px 11px;text-align:center;vertical-align:middle}
 tbody td:first-child{text-align:left;font-weight:700}
-.tcell{color:var(--muted);font-size:11px}
-.qact{background:#eff6ff}
-.qhdr{background:#2563a8;color:#fff;border-radius:5px;padding:2px 7px;font-size:10px}
 
 /* AGENCY PAGE */
 .ftabs{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
@@ -160,18 +151,12 @@ tbody td:first-child{text-align:left;font-weight:700}
 .toolbar{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
 .sbox{flex:1;min-width:160px;padding:7px 12px;border:1px solid var(--border);border-radius:9px;font-size:13px;font-family:inherit;outline:none}
 .sbox:focus{border-color:var(--primary2)}
-.sbtn{padding:6px 10px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:11px;cursor:pointer;font-family:inherit;transition:.15s}
-.sbtn.active,.sbtn:hover{background:var(--primary2);color:#fff;border-color:var(--primary2)}
-.vbtn{padding:6px 10px;border:1px solid var(--border);background:#fff;border-radius:7px;cursor:pointer;font-size:11px;transition:.15s}
-.vbtn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-
 .ag-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
 .acard{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:12px;cursor:pointer;transition:.2s;overflow:hidden;position:relative}
 .acard:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.1);border-color:var(--primary2)}
 .acard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--bclr,#ccc)}
 .ttag{position:absolute;top:8px;right:8px;font-size:9px;padding:2px 6px;border-radius:20px;font-weight:700}
 .aname{font-size:12px;font-weight:700;margin-bottom:5px;line-height:1.3;padding-right:48px}
-.aalloc{font-size:10px;color:var(--muted);margin-bottom:7px}
 .prow{display:flex;gap:5px;margin-bottom:4px;align-items:center}
 .plbl{font-size:9px;color:var(--muted);width:58px;flex-shrink:0}
 .ptr-w{flex:1;position:relative;height:6px}
@@ -207,23 +192,6 @@ tbody td:first-child{text-align:left;font-weight:700}
 .ti-inner{position:absolute;inset:0;display:flex;align-items:center;padding-left:7px;font-size:9px;font-weight:700;color:#fff;gap:5px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
 .ti-vals{display:flex;justify-content:space-between;font-size:10px}
 
-.proj-item{background:var(--card);border-radius:11px;border:1px solid var(--border);margin-bottom:7px;overflow:hidden}
-.proj-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;cursor:pointer;gap:8px}
-.proj-hdr:hover{background:#f8fafc}
-.pjname{font-size:12px;font-weight:700;flex:1;line-height:1.3}
-.chevron{transition:transform .2s;font-size:12px;color:var(--muted);flex-shrink:0}
-.proj-item.open .chevron{transform:rotate(90deg)}
-.proj-body{display:none;padding:0 13px 12px}
-.proj-item.open .proj-body{display:block}
-.itbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px}
-.itbl th{background:#f8fafc;padding:5px 8px;text-align:left;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border)}
-.itbl td{padding:4px 8px;border-bottom:1px solid #f1f5f9}
-.itbl tr:last-child td{border:none}
-.itbl tr:hover td{background:#f8fafc}
-.ctag{display:inline-block;border-radius:4px;padding:1px 5px;font-size:9px;font-weight:700}
-.ci{background:#dbeafe;color:#1d4ed8}.co{background:#dcfce7;color:#15803d}
-.cs{background:#ede9fe;color:#6d28d9}.cc{background:#ffedd5;color:#c2410c}
-
 @media(max-width:680px){.cmp-grid{grid-template-columns:1fr}.hero-main .hb{font-size:28px}}
 </style>
 </head>
@@ -241,128 +209,55 @@ tbody td:first-child{text-align:left;font-weight:700}
   </div>
 </div>
 
-<!-- SETUP SCREEN -->
 <div id="setupScreen" style="display:none">
   <div class="setup-card">
     <div class="setup-icon">📊</div>
     <div class="setup-title">เชื่อมต่อ Google Sheets</div>
-    <div class="setup-sub">Dashboard นี้ดึงข้อมูลสดจาก Google Sheets โดยตรง<br>ทำตามขั้นตอนด้านล่างก่อนใช้งาน</div>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-text">เปิด Google Sheets → คลิก <strong>แชร์</strong> (มุมบนขวา)</div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-text">เปลี่ยนการเข้าถึงทั่วไป เป็น <strong>"ทุกคนที่มีลิงก์"</strong> → <strong>ผู้ดู</strong> → บันทึก</div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-text">กดปุ่มด้านล่างเพื่อโหลดข้อมูล Dashboard จะดึงข้อมูลสดทุกครั้งที่เปิด
-          <div class="url-box">https://docs.google.com/spreadsheets/d/<br>1fZ7qvQPe22cXtu1nM-EAcR3huykrsQswwLDwUUXfTok/export?format=csv</div>
-        </div>
-      </div>
-    </div>
-
-    <button class="setup-btn" onclick="loadData()">🚀 โหลดข้อมูลจาก Google Sheets</button>
+    <div class="setup-sub">ระบบดึงข้อมูลไม่สำเร็จ กรุณาตรวจสอบการแชร์ไฟล์</div>
+    <button class="setup-btn" onclick="loadData()">🚀 ลองอีกครั้ง</button>
     <div class="err-box" id="errBox"></div>
   </div>
 </div>
 
-<!-- LOADING -->
 <div id="loadingScreen" style="display:block">
   <div class="spinner"></div>
-  <div style="font-size:14px;font-weight:600;color:var(--muted)">กำลังดึงข้อมูลจาก Google Sheets...</div>
-  <div style="font-size:12px;color:var(--muted);margin-top:6px">โปรดรอสักครู่</div>
+  <div style="font-size:14px;font-weight:600;color:var(--muted);text-align:center">กำลังดึงข้อมูลสดจาก Google Sheets...</div>
 </div>
 
-<!-- BREADCRUMB -->
 <div class="bc" id="bc" style="display:none"><span style="font-weight:600">🏠 ภาพรวม</span></div>
 
-<!-- NAV -->
 <div class="nav" id="mainNav" style="display:none">
   <button class="ntab active" onclick="goPage('overview')" id="nt-ov">📊 ภาพรวม + เป้าหมาย</button>
   <button class="ntab" onclick="goPage('agencies')" id="nt-ag">🏛️ หน่วยงาน <span class="nb" id="nb-all">—</span></button>
-  <button class="ntab" onclick="goPage('agencies','อปท.')" id="nt-obt">🏘️ อปท. <span class="nb" id="nb-obt">—</span></button>
-  <button class="ntab" onclick="goPage('agencies','ราชการ')" id="nt-gov">⚙️ ส่วนราชการ <span class="nb" id="nb-gov">—</span></button>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dashboard">
-
-  <!-- OVERVIEW PAGE -->
   <div id="pg-overview" class="page active">
     <div class="hero" id="heroBlock"></div>
     <div class="sec-lbl">สรุปตามประเภทงบ</div>
     <div class="btype-grid" id="btypeGrid"></div>
-
     <div class="q-tabs" id="qTabs">
-      <button class="qtab" onclick="setQ(1,this)">ไตรมาส 1<span class="qtab-s">ต.ค.–ธ.ค. 68</span></button>
-      <button class="qtab cur active" onclick="setQ(2,this)">ไตรมาส 2<span class="qtab-s">ม.ค.–มี.ค. 69 ▶ ปัจจุบัน</span></button>
-      <button class="qtab" onclick="setQ(3,this)">ไตรมาส 3<span class="qtab-s">เม.ย.–มิ.ย. 69</span></button>
-      <button class="qtab" onclick="setQ(4,this)">ไตรมาส 4<span class="qtab-s">ก.ค.–ก.ย. 69</span></button>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:11px">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#2563a8;opacity:.35;border-radius:2px;display:inline-block"></span>เป้าหมาย</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#16a34a;border-radius:2px;display:inline-block"></span>จริง (สูงกว่าเป้า)</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#dc2626;border-radius:2px;display:inline-block"></span>จริง (ต่ำกว่าเป้า)</span>
-      <span style="color:var(--muted)">⚠️ ข้อมูลจริง ณ ปลายไตรมาส 2</span>
+      <button class="qtab" onclick="setQ(1,this)">ไตรมาส 1</button>
+      <button class="qtab cur active" onclick="setQ(2,this)">ไตรมาส 2</button>
     </div>
     <div class="cmp-grid" id="cmpGrid"></div>
-    <div class="tbl-sec">
-      <div class="tbl-hdr2">ตารางเปรียบเทียบเป้าหมาย vs ผลจริง ทุกไตรมาส</div>
-      <div style="overflow-x:auto"><table id="sumTable"></table></div>
-    </div>
-    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:11px;color:#92400e;margin-bottom:8px">
-      📌 เป้าหมายตามมาตรการเร่งรัดเบิกจ่าย กรมบัญชีกลาง ปีงบประมาณ 2569 | ข้อมูลสดจาก Google Sheets จังหวัดอำนาจเจริญ
-    </div>
   </div>
 
-  <!-- AGENCIES PAGE -->
   <div id="pg-agencies" class="page">
-    <div class="ftabs" id="ftabs">
-      <button class="ftab active" onclick="setGrp('all',this)">ทั้งหมด</button>
-      <button class="ftab" onclick="setGrp('อปท.',this)">🏘️ อปท. รวม</button>
-      <button class="ftab" onclick="setGrp('อบจ.',this)">🏢 อบจ.</button>
-      <button class="ftab" onclick="setGrp('เทศบาล',this)">🏙️ เทศบาล</button>
-      <button class="ftab" onclick="setGrp('อบต.',this)">🏡 อบต.</button>
-      <button class="ftab" onclick="setGrp('ราชการ',this)">⚙️ ส่วนราชการ</button>
-    </div>
     <div class="toolbar">
       <input class="sbox" id="srch" placeholder="🔍 ค้นหาหน่วยงาน..." oninput="renderAg()">
-      <button class="sbtn active" onclick="setSrt('alloc',this)">งบมากสุด</button>
-      <button class="sbtn" onclick="setSrt('pct',this)">%เบิกสูง</button>
-      <button class="sbtn" onclick="setSrt('name',this)">A-Z</button>
-      <button class="vbtn active" onclick="setV('card',this)">☰ การ์ด</button>
-      <button class="vbtn" onclick="setV('table',this)">≡ ตาราง</button>
     </div>
     <div style="font-size:12px;font-weight:700;color:var(--primary);margin-bottom:10px" id="agTitle">—</div>
     <div class="ag-grid" id="agGrid"></div>
-    <div id="agTblWrap" style="display:none">
-      <div style="overflow-x:auto">
-        <table>
-          <thead><tr>
-            <th>#</th><th style="text-align:left">หน่วยงาน</th><th>ประเภท</th>
-            <th>งบจัดสรร</th><th>เบิกจ่าย</th>
-            <th>%ภาพรวม / เป้า</th><th>%ประจำ / เป้า</th><th>%ลงทุน / เป้า</th>
-          </tr></thead>
-          <tbody id="agTbody"></tbody>
-        </table>
-      </div>
-    </div>
   </div>
 
-  <!-- DETAIL PAGE -->
   <div id="pg-detail" class="page">
     <button class="back-btn" onclick="backDet()">← กลับ</button>
     <div id="detContent"></div>
   </div>
-
-</div><!-- end #dashboard -->
+</div>
 
 <script>
-// ============ TARGETS ============
 const TARGETS={
   'ภาพรวม':      {q1:[38,33],q2:[61,55],q3:[81,76],q4:[100,93]},
   'รายจ่ายประจำ': {q1:[38,37],q2:[61,60],q3:[84,83],q4:[100,98]},
@@ -377,238 +272,95 @@ const SHEET_ID = '1InruqYSLdiuIYZNUbiNqzioHTvUwoH5Tz2jTCFjPjnE';
 const GID = '391006169'; 
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-// ============ STATE ============
 let DATA=null, curQ=2, curGrp='all', curSrt='alloc', curV='card', prevPage='overview';
 
-// ============ HELPERS ============
 const fmt=n=>n==null?'—':Number(n).toLocaleString('th',{minimumFractionDigits:2,maximumFractionDigits:2});
 const bc=p=>p>=70?'#16a34a':p>=50?'#ea580c':'#dc2626';
-const pBadge=p=>{const c=p>=70?'bs':p>=50?'bw':'bd';return`<span class="badge ${c}">${+Number(p).toFixed(2)}%</span>`;};
-const tClass=g=>g==='อบจ.'?'type-abj':g==='เทศบาล'?'type-muni':g==='อบต.'?'type-abt':'type-gov';
-const tLbl=g=>g==='อบจ.'?'อบจ.':g==='เทศบาล'?'ทน./ทต.':g==='อบต.'?'อบต.':'ราชการ';
-const cClass=c=>c==='งบลงทุน'?'ci':c==='งบประจำ'?'co':c==='เงินอุดหนุนเฉพาะกิจ'?'cs':'cc';
-const diffTxt=d=>d>0?`+${d.toFixed(2)}%`:`${d.toFixed(2)}%`;
-const diffCls=d=>d>0?'dabove':d<0?'dbelow':'deq';
 
-// ============ LOAD DATA ============
 async function loadData(){
-  document.getElementById('setupScreen').style.display='none';
   document.getElementById('loadingScreen').style.display='block';
-  document.getElementById('errBox') && (document.getElementById('errBox').style.display='none');
-
   try {
     const res = await fetch(CSV_URL);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
     const csv = await res.text();
     DATA = parseCSV(csv);
     showDashboard();
   } catch(e){
     document.getElementById('loadingScreen').style.display='none';
     document.getElementById('setupScreen').style.display='block';
-    const eb=document.getElementById('errBox');
-    if(eb){eb.style.display='block';
-    eb.innerHTML=`❌ <strong>ไม่สามารถดึงข้อมูลได้:</strong> ${e.message}<br><br>
-      กรุณาตรวจสอบว่า Google Sheet ถูกตั้งเป็น <strong>"ทุกคนที่มีลิงก์"</strong> แล้ว`;}
+    document.getElementById('errBox').innerHTML = "ดึงข้อมูลล้มเหลว กรุณาเช็คการแชร์ไฟล์";
   }
 }
 
-// โหลดอัตโนมัติตอนเปิดหน้า
-window.addEventListener('load', loadData);
-
-// ============ PARSE CSV ============
 function parseCSV(csv){
   const lines = csv.split('\n').map(l=>l.trim()).filter(l=>l);
-  const headers = parseCSVLine(lines[0]);
+  
+  // ค้นหาแถวที่มีหัวตาราง "หน่วยงาน"
+  const headerIdx = lines.findIndex(l => l.includes("หน่วยงาน"));
+  if(headerIdx === -1) return null;
 
-  // หา index
-  const idx={};
-  headers.forEach((h,i)=>idx[h]=i);
+  const headers = parseCSVLine(lines[headerIdx]);
+  const col=(row,name)=>row[headers.findIndex(h=>h.includes(name))]||'';
+  const toNum=s=>parseFloat(String(s).replace(/[",]/g,''))||0;
 
-  // ฟังก์ชันหา column
-  const col=(row,name)=>{
-    const i=idx[name];
-    return i!=null?row[i]||'':'';
-  };
-  const toNum=s=>{
-    if(!s||s==='-'||s==='#') return 0;
-    try{return parseFloat(s.replace(/,/g,''))||0}catch{return 0}
-  };
-
-  const dataRows=[];
-  for(let i=17;i<lines.length;i++){
-    const row=parseCSVLine(lines[i]);
-    if(!row[0]||row[0]==='Grand Total') continue;
-    dataRows.push(row);
-  }
-
-  // สร้าง agency map
   const agMap={};
-  for(const row of dataRows){
+  for(let i=headerIdx+1; i<lines.length; i++){
+    const row=parseCSVLine(lines[i]);
     const aname=col(row,'หน่วยงาน');
-    if(!aname) continue;
-    const alloc=toNum(col(row,'งบจัดสรรถือจ่ายจังหวัด (ล้านบาท)'));
-    const spent=toNum(col(row,'เบิกจ่ายทั้งสิ้น (ล้านบาท)'));
+    if(!aname || aname.includes('Grand Total') || aname.includes('รายงาน')) continue;
+
+    const alloc=toNum(col(row,'งบจัดสรร'));
+    const spent=toNum(col(row,'เบิกจ่ายทั้งสิ้น'));
     const budgetType=col(row,'งบรายจ่าย');
-    const source=col(row,'แหล่งของเงิน');
-    const central=col(row,'งบส่วนราชการหรืองบกลาง');
-    const proj=col(row,'งาน/โครงการ');
-    const bname=col(row,'ชื่อรหัสงบประมาณ').slice(0,60);
 
-    // classify
-    let cat;
-    if(central==='งบกลาง') cat='งบกลาง';
-    else if(source.includes('อุดหนุนเฉพาะกิจ')) cat='เงินอุดหนุนเฉพาะกิจ';
-    else if(budgetType==='งบลงทุน') cat='งบลงทุน';
-    else cat='งบประจำ';
-
-    if(!agMap[aname]) agMap[aname]={
-      name:aname,alloc:0,spent:0,
-      grp:{งบลงทุน:{a:0,s:0},งบประจำ:{a:0,s:0},เงินอุดหนุนเฉพาะกิจ:{a:0,s:0},งบกลาง:{a:0,s:0}},
-      projects:{}
-    };
-    const ag=agMap[aname];
-    ag.alloc+=alloc; ag.spent+=spent;
-    ag.grp[cat].a+=alloc; ag.grp[cat].s+=spent;
-
-    if(!ag.projects[proj]) ag.projects[proj]={a:0,s:0,items:[]};
-    ag.projects[proj].a+=alloc; ag.projects[proj].s+=spent;
-    ag.projects[proj].items.push({b:bname,s:source.replace(' /งบส่วนราชการ','').replace(' /งบกลาง',''),a:alloc,sp:spent,p:0,cat});
+    if(!agMap[aname]) agMap[aname]={name:aname,alloc:0,spent:0,grp:{'งบลงทุน':{a:0,s:0},'งบประจำ':{a:0,s:0}}};
+    agMap[aname].alloc+=alloc; agMap[aname].spent+=spent;
+    if(budgetType.includes('ลงทุน')) { agMap[aname].grp['งบลงทุน'].a+=alloc; agMap[aname].grp['งบลงทุน'].s+=spent; }
+    else { agMap[aname].grp['งบประจำ'].a+=alloc; agMap[aname].grp['งบประจำ'].s+=spent; }
   }
 
-  // แปลงเป็น array
-  const agencies=Object.values(agMap).map(ag=>{
-    const g=getGroup(ag.name);
-    const pjs=Object.entries(ag.projects).map(([n,pd])=>({
-      n,a:+pd.a.toFixed(4),sp:+pd.s.toFixed(4),
-      p:pd.a>0?+(pd.s/pd.a*100).toFixed(2):0,
-      items:pd.items.map(it=>({...it,p:it.a>0?+(it.sp/it.a*100).toFixed(1):0}))
-    })).sort((a,b)=>b.a-a.a);
+  const agencies=Object.values(agMap).map(ag=>({
+    n:ag.name, a:ag.alloc, sp:ag.spent, pa:ag.alloc>0?ag.spent/ag.alloc*100:0, g:getGroup(ag.name), grp:ag.grp
+  })).sort((a,b)=>b.a-a.a);
 
-    const grpOut={};
-    for(const[k,v]of Object.entries(ag.grp)){
-      grpOut[k]={a:+v.a.toFixed(4),s:+v.s.toFixed(4),p:v.a>0?+(v.s/v.a*100).toFixed(2):0};
-    }
-    return{
-      n:ag.name, a:+ag.alloc.toFixed(4), sp:+ag.spent.toFixed(4),
-      pa:ag.alloc>0?+(ag.spent/ag.alloc*100).toFixed(2):0,
-      g, grp:grpOut, projects:pjs
-    };
-  }).sort((a,b)=>b.a-a.a);
-
-  // summary
-  const s={a:0,s:0,grp:{งบลงทุน:{a:0,s:0},งบประจำ:{a:0,s:0},เงินอุดหนุนเฉพาะกิจ:{a:0,s:0},งบกลาง:{a:0,s:0}}};
-  for(const ag of agencies){
-    s.a+=ag.a; s.s+=ag.sp;
-    for(const[k,v]of Object.entries(ag.grp)){s.grp[k].a+=v.a;s.grp[k].s+=v.s;}
-  }
-  for(const v of Object.values(s.grp)) v.p=v.a>0?+(v.s/v.a*100).toFixed(2):0;
-  s.p=s.a>0?+(s.s/s.a*100).toFixed(2):0;
-  s.a=+s.a.toFixed(2); s.s=+s.s.toFixed(2);
+  const s={a:agencies.reduce((x,y)=>x+y.a,0), s:agencies.reduce((x,y)=>x+y.sp,0)};
+  s.p=s.a>0?s.s/s.a*100:0;
 
   return{summary:s, agencies};
 }
 
 function parseCSVLine(line){
-  const result=[];
-  let cur='', inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){inQ=!inQ;}
+  const result=[]; let cur='', inQ=false;
+  for(let c of line){
+    if(c==='"') inQ=!inQ;
     else if(c===','&&!inQ){result.push(cur.trim());cur='';}
     else cur+=c;
   }
-  result.push(cur.trim());
-  return result;
+  result.push(cur.trim()); return result;
 }
 
 function getGroup(name){
-  if('องค์การบริหารส่วนจังหวัด'in name||name.includes('องค์การบริหารส่วนจังหวัด')) return 'อบจ.';
+  if(name.includes('องค์การบริหารส่วนจังหวัด')) return 'อบจ.';
   if(name.includes('เทศบาล')) return 'เทศบาล';
-  if(name.includes('องค์การบริหารส่วนตำบล')) return 'อบต.';
+  if(name.includes('ตำบล')) return 'อบต.';
   return 'ราชการ';
 }
 
-// ============ SHOW DASHBOARD ============
 function showDashboard(){
   document.getElementById('loadingScreen').style.display='none';
-  document.getElementById('bc').style.display='flex';
   document.getElementById('mainNav').style.display='flex';
   document.getElementById('dashboard').style.display='block';
-
-  const now=new Date();
-  document.getElementById('lastUpdate').textContent=
-    `อัปเดต ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')} น.`;
-
-  const abj=DATA.agencies.filter(a=>a.g==='อบจ.');
-  const muni=DATA.agencies.filter(a=>a.g==='เทศบาล');
-  const abt=DATA.agencies.filter(a=>a.g==='อบต.');
-  const obt=[...abj,...muni,...abt];
-  const gov=DATA.agencies.filter(a=>a.g==='ราชการ');
-  document.getElementById('nb-all').textContent=DATA.agencies.length;
-  document.getElementById('nb-obt').textContent=obt.length;
-  document.getElementById('nb-gov').textContent=gov.length;
-
+  document.getElementById('lastUpdate').textContent = `อัปเดต ${new Date().toLocaleTimeString('th-TH')}`;
   renderOverview();
 }
 
-// ============ PAGE NAV ============
-function goPage(pg,grpFilter){
+function goPage(pg){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-'+pg).classList.add('active');
-  ['nt-ov','nt-ag'].forEach(t=>document.getElementById(t)?.classList.remove('active'));
-  if(pg==='overview') document.getElementById('nt-ov').classList.add('active');
-  else if(pg==='agencies') document.getElementById('nt-ag').classList.add('active');
-  if(pg==='agencies'){
-    if(grpFilter){
-      curGrp=grpFilter;
-      document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.ftab').forEach(b=>{
-        if(b.getAttribute('onclick').includes(`'${grpFilter}'`)) b.classList.add('active');
-      });
-    }
-    renderAg();
-  }
-  if(pg==='overview') renderOverview();
-  updateBC(pg);
-}
-
-function updateBC(pg,agName){
-  const el=document.getElementById('bc');
-  if(pg==='overview') el.innerHTML=`<span style="font-weight:600">🏠 ภาพรวม</span>`;
-  else if(pg==='agencies') el.innerHTML=`<span class="bcl" onclick="goPage('overview')">🏠 ภาพรวม</span><span class="bcs">›</span><span style="font-weight:600">หน่วยงาน</span>`;
-  else if(pg==='detail'&&agName) el.innerHTML=`<span class="bcl" onclick="goPage('overview')">🏠 ภาพรวม</span><span class="bcs">›</span><span class="bcl" onclick="backDet()">หน่วยงาน</span><span class="bcs">›</span><span style="font-weight:600">${agName}</span>`;
-}
-
-// ============ OVERVIEW ============
-function getActual(){
-  if(!DATA) return null;
-  const s=DATA.summary,g=s.grp;
-  const op_a=g['งบประจำ'].a+g['งบกลาง'].a, op_s=g['งบประจำ'].s+g['งบกลาง'].s;
-  const inv_a=g['งบลงทุน'].a+g['เงินอุดหนุนเฉพาะกิจ'].a, inv_s=g['งบลงทุน'].s+g['เงินอุดหนุนเฉพาะกิจ'].s;
-  return{
-    'ภาพรวม':     {alloc:s.a,spent:s.s,pct:s.p},
-    'รายจ่ายประจำ':{alloc:op_a,spent:op_s,pct:op_a?+(op_s/op_a*100).toFixed(2):0},
-    'รายจ่ายลงทุน':{alloc:inv_a,spent:inv_s,pct:inv_a?+(inv_s/inv_a*100).toFixed(2):0},
-  };
-}
-
-function setQ(q,btn){
-  curQ=q;
-  document.querySelectorAll('.qtab').forEach(b=>b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  document.querySelector('.hdr-info p').textContent=`จังหวัดอำนาจเจริญ | ปีงบประมาณ 2569 | ไตรมาส ${q}${q===2?' ▶ ปัจจุบัน':''}`;
-  renderOverview();
+  if(pg==='agencies') renderAg();
 }
 
 function renderOverview(){
-  if(!DATA) return;
-  const s=DATA.summary, ACT=getActual();
-  const obt=DATA.agencies.filter(a=>['อบจ.','เทศบาล','อบต.'].includes(a.g));
-  const gov=DATA.agencies.filter(a=>a.g==='ราชการ');
-  const ta_o=obt.reduce((x,a)=>x+a.a,0), ts_o=obt.reduce((x,a)=>x+a.sp,0);
-  const ta_g=gov.reduce((x,a)=>x+a.a,0), ts_g=gov.reduce((x,a)=>x+a.sp,0);
-  const pp_o=ta_o?ts_o/ta_o*100:0, pp_g=ta_g?ts_g/ta_g*100:0;
-
+  const s=DATA.summary;
   document.getElementById('heroBlock').innerHTML=`
     <div class="hero-grid">
       <div class="hero-main">
@@ -616,307 +368,23 @@ function renderOverview(){
         <div class="hb">${fmt(s.a)}</div>
         <div class="hs">ล้านบาท | ${DATA.agencies.length} หน่วยงาน</div>
       </div>
-      <div class="hero-stats">
-        <div class="hstat"><div class="sl">เบิกจ่ายทั้งสิ้น</div><div class="sv">${fmt(s.s)}</div><div class="ss">ล้านบาท</div>
-          <div class="sbar"><div class="sfill" style="width:${s.p}%;background:${bc(s.p)}"></div></div></div>
-        <div class="hstat"><div class="sl">%เบิกจ่าย</div><div class="sv" style="color:${bc(s.p)}">${s.p.toFixed(2)}%</div>
-          <div class="ss">เป้า Q${curQ}: ${TARGETS['ภาพรวม']['q'+curQ][1]}%</div>
-          <div class="sbar"><div class="sfill" style="width:${s.p}%;background:${bc(s.p)}"></div></div></div>
-        <div class="hstat" onclick="goPage('agencies','อปท.')" style="cursor:pointer">
-          <div class="sl">อปท. (${obt.length} แห่ง)</div><div class="sv" style="color:${bc(pp_o)}">${pp_o.toFixed(1)}%</div>
-          <div class="ss">${fmt(ta_o)} ลบ.</div>
-          <div class="sbar"><div class="sfill" style="width:${pp_o}%;background:${bc(pp_o)}"></div></div></div>
-        <div class="hstat" onclick="goPage('agencies','ราชการ')" style="cursor:pointer">
-          <div class="sl">ส่วนราชการ (${gov.length} แห่ง)</div><div class="sv" style="color:${bc(pp_g)}">${pp_g.toFixed(1)}%</div>
-          <div class="ss">${fmt(ta_g)} ลบ.</div>
-          <div class="sbar"><div class="sfill" style="width:${pp_g}%;background:${bc(pp_g)}"></div></div></div>
+      <div class="hstat">
+        <div class="sl">%เบิกจ่ายภาพรวม</div>
+        <div class="sv" style="color:${bc(s.p)}">${s.p.toFixed(2)}%</div>
       </div>
     </div>`;
-
-  // BUDGET TYPE CARDS
-  const BT=['งบลงทุน','งบประจำ','เงินอุดหนุนเฉพาะกิจ','งบกลาง'];
-  document.getElementById('btypeGrid').innerHTML=BT.map(t=>{
-    const v=s.grp[t]||{a:0,s:0,p:0}, c=BT_COLORS[t];
-    return`<div class="btcard" style="--c:${c}">
-      <div class="bc-icon">${BT_ICONS[t]}</div>
-      <div class="bc-name">${t}</div>
-      <div class="bc-alloc">${fmt(v.a)} <span>ล้านบาท</span></div>
-      <div class="bc-spent">เบิกจ่าย ${fmt(v.s)} ล้านบาท</div>
-      <div class="pbar-wrap"><div class="pbar-fill" style="width:${Math.min(v.p,100)}%"></div></div>
-      <div class="pbar-lbl"><span style="color:${c};font-weight:700">${v.p.toFixed(2)}%</span>
-        <span style="color:var(--muted)">${(v.a/s.a*100).toFixed(1)}% ของงบรวม</span></div>
-    </div>`;
-  }).join('');
-
-  // COMPARE CARDS
-  const qk='q'+curQ, isReal=curQ<=2;
-  document.getElementById('cmpGrid').innerHTML=Object.keys(TARGETS).map(k=>{
-    const T=TARGETS[k], act=ACT[k], color=TC[k];
-    const tgtNow=T[qk][1];
-    const diff=isReal?+(act.pct-tgtNow).toFixed(2):null;
-    const aColor=isReal?bc(act.pct):color;
-    const gAct=Math.min(act.pct,100)/100*283;
-    const gTgt=Math.min(tgtNow,100)/100*283;
-
-    const qBars=['q1','q2','q3','q4'].map((q,i)=>{
-      const qTgt=T[q][1];
-      const dispAct=q==='q2'&&isReal?act.pct:null;
-      const isCur=q===qk;
-      return`<div class="qp-row" style="${isCur?'background:#eff6ff;border-radius:5px;padding:1px 3px;margin:-1px -3px':''}">
-        <div class="qp-lbl" style="color:${isCur?color:''}">${['Q1','Q2','Q3','Q4'][i]}</div>
-        <div class="qp-track">
-          <div class="qp-tgt" style="width:${qTgt}%;background:${color}"></div>
-          ${dispAct!=null?`<div class="qp-act" style="width:${Math.min(dispAct,100)}%;background:${bc(dispAct)}"></div>`:''}
-          <div class="qp-line" style="left:${qTgt}%"></div>
-          <div class="qp-inner">${dispAct!=null?dispAct.toFixed(1)+'%':''}</div>
-        </div>
-        <div class="qp-vals">
-          <div class="qp-tv">เป้า ${qTgt}%</div>
-          ${dispAct!=null?`<div class="qp-av" style="color:${bc(dispAct)}">${dispAct.toFixed(1)}%</div>`:'<div style="color:var(--muted)">—</div>'}
-        </div>
-      </div>`;
-    }).join('');
-
-    return`<div class="ccard">
-      <div class="cc-hdr" style="background:${color}12;border-bottom:2px solid ${color}30">
-        <div style="font-size:20px">${TI[k]}</div>
-        <div><div class="cc-title" style="color:${color}">${k}</div>
-          <div class="cc-sub">จัดสรร ${fmt(act.alloc)} ลบ. | เบิก ${fmt(act.spent)} ลบ.</div></div>
-      </div>
-      <div class="cc-body">
-        <div class="gauge-row">
-          <div class="gauge">
-            <svg viewBox="0 0 100 100" width="84" height="84">
-              <circle class="g-track" cx="50" cy="50" r="45"/>
-              <circle class="g-tgt" cx="50" cy="50" r="45" stroke="${color}" stroke-dashoffset="${283-gTgt}"/>
-              ${isReal?`<circle class="g-act" cx="50" cy="50" r="45" stroke="${aColor}" stroke-dashoffset="${283-gAct}"/>`:''}
-            </svg>
-            <div class="g-text">
-              <div class="g-pct" style="color:${isReal?aColor:color}">${isReal?act.pct.toFixed(1)+'%':tgtNow+'%'}</div>
-              <div class="g-lbl">${isReal?'จริง':'เป้า'}</div>
-            </div>
-          </div>
-          <div class="gi">
-            <div class="gi-row"><span class="gi-l">เป้า Q${curQ}</span><span class="gi-r" style="color:${color}">${tgtNow}%</span></div>
-            ${isReal?`<div class="gi-row"><span class="gi-l">ผลจริง</span><span class="gi-r" style="color:${aColor}">${act.pct.toFixed(2)}%</span></div>
-            <div class="gi-row"><span class="gi-l">ส่วนต่าง</span><span class="dbadge ${diffCls(diff)}">${diffTxt(diff)}</span></div>`
-            :`<div style="color:var(--muted);font-size:11px;margin-top:6px">ยังไม่มีข้อมูลจริง</div>`}
-          </div>
-        </div>
-        <div class="qp-wrap"><div class="qp-title">เส้นทางเป้าหมายทุกไตรมาส</div>${qBars}</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // TABLE
-  const ks=Object.keys(TARGETS);
-  document.getElementById('sumTable').innerHTML=`
-    <thead>
-      <tr>
-        <th rowspan="2" style="text-align:left;vertical-align:middle">รายการ</th>
-        <th colspan="2">ไตรมาส 1</th>
-        <th colspan="3" class="qact"><span class="qhdr">▶ ไตรมาส 2 ปัจจุบัน</span></th>
-        <th colspan="2">ไตรมาส 3</th>
-        <th colspan="2">ไตรมาส 4</th>
-      </tr>
-      <tr>
-        <th class="tcell">เป้าใช้จ่าย</th><th class="tcell">เป้าเบิกจ่าย</th>
-        <th class="tcell qact">เป้าใช้จ่าย</th><th class="tcell qact">เป้าเบิกจ่าย</th>
-        <th class="qact" style="font-weight:800;color:#1d4ed8">จริงเบิกจ่าย</th>
-        <th class="tcell">เป้าใช้จ่าย</th><th class="tcell">เป้าเบิกจ่าย</th>
-        <th class="tcell">เป้าใช้จ่าย</th><th class="tcell">เป้าเบิกจ่าย</th>
-      </tr>
-    </thead>
-    <tbody>${ks.map(k=>{
-      const T=TARGETS[k],act=ACT[k];
-      const diff=+(act.pct-T.q2[1]).toFixed(2);
-      return`<tr>
-        <td>${TI[k]} ${k}</td>
-        <td class="tcell">${T.q1[0]}%</td><td class="tcell">${T.q1[1]}%</td>
-        <td class="tcell qact">${T.q2[0]}%</td><td class="tcell qact">${T.q2[1]}%</td>
-        <td class="qact">
-          <span style="font-size:13px;font-weight:800;color:${bc(act.pct)}">${act.pct.toFixed(2)}%</span>
-          <span class="dbadge ${diffCls(diff)}" style="margin-left:4px;font-size:9px">${diffTxt(diff)}</span>
-        </td>
-        <td class="tcell">${T.q3[0]}%</td><td class="tcell">${T.q3[1]}%</td>
-        <td class="tcell">${T.q4[0]}%</td><td class="tcell">${T.q4[1]}%</td>
-      </tr>`;
-    }).join('')}</tbody>`;
-}
-
-// ============ AGENCIES ============
-function agActual(a){
-  const g=a.grp||{};
-  const op_a=(g['งบประจำ']?.a||0)+(g['งบกลาง']?.a||0);
-  const op_s=(g['งบประจำ']?.s||0)+(g['งบกลาง']?.s||0);
-  const inv_a=(g['งบลงทุน']?.a||0)+(g['เงินอุดหนุนเฉพาะกิจ']?.a||0);
-  const inv_s=(g['งบลงทุน']?.s||0)+(g['เงินอุดหนุนเฉพาะกิจ']?.s||0);
-  return{
-    all:{pct:a.pa||0,alloc:a.a,spent:a.sp},
-    op:{pct:op_a?+(op_s/op_a*100).toFixed(2):0,alloc:op_a,spent:op_s},
-    inv:{pct:inv_a?+(inv_s/inv_a*100).toFixed(2):0,alloc:inv_a,spent:inv_s},
-  };
-}
-
-function getFiltered(){
-  if(!DATA) return [];
-  let d=[...DATA.agencies];
-  if(curGrp==='อปท.') d=d.filter(a=>['อบจ.','เทศบาล','อบต.'].includes(a.g));
-  else if(curGrp!=='all') d=d.filter(a=>a.g===curGrp);
-  const q=document.getElementById('srch')?.value.toLowerCase()||'';
-  if(q) d=d.filter(a=>a.n.toLowerCase().includes(q));
-  if(curSrt==='alloc') d.sort((a,b)=>b.a-a.a);
-  else if(curSrt==='pct') d.sort((a,b)=>b.pa-a.pa);
-  else d.sort((a,b)=>a.n.localeCompare(b.n,'th'));
-  return d;
 }
 
 function renderAg(){
-  const list=getFiltered();
-  const ta=list.reduce((s,a)=>s+a.a,0), ts=list.reduce((s,a)=>s+a.sp,0);
-  const tp=ta?ts/ta*100:0;
-  const tgtAll=TARGETS['ภาพรวม']['q'+curQ][1];
-  const tgtOp=TARGETS['รายจ่ายประจำ']['q'+curQ][1];
-  const tgtInv=TARGETS['รายจ่ายลงทุน']['q'+curQ][1];
-  document.getElementById('agTitle').innerHTML=`<strong>${list.length}</strong> หน่วยงาน | งบรวม <strong>${fmt(ta)}</strong> ลบ. | เบิก <strong style="color:${bc(tp)}">${tp.toFixed(2)}%</strong> (เป้า Q${curQ}: ${tgtAll}%)`;
-
-  document.getElementById('agGrid').innerHTML=list.map(a=>{
-    const idx=DATA.agencies.findIndex(x=>x.n===a.n);
-    const act=agActual(a);
-    const pA=act.all.pct, pO=act.op.pct, pI=act.inv.pct;
-    return`<div class="acard" style="--bclr:${bc(pA)}" onclick="openDet(${idx})">
-      <span class="ttag ${tClass(a.g)}">${tLbl(a.g)}</span>
+  const list=DATA.agencies;
+  document.getElementById('agGrid').innerHTML=list.map(a=>`
+    <div class="acard" onclick="openDet('${a.n}')">
       <div class="aname">${a.n}</div>
-      <div class="aalloc">งบจัดสรร ${fmt(a.a)} ลบ.</div>
-      <div class="prow"><span class="plbl">ภาพรวม</span>
-        <div class="ptr-w"><div class="ptr-bg"><div class="ptr-act" style="width:${Math.min(pA,100)}%;background:${bc(pA)}"></div></div>
-          <div class="ptr-tline" style="left:${Math.min(tgtAll,100)}%"></div></div>
-        <span class="pval" style="color:${bc(pA)}">${pA.toFixed(1)}%</span></div>
-      ${act.op.alloc>0?`<div class="prow"><span class="plbl">ประจำ</span>
-        <div class="ptr-w"><div class="ptr-bg"><div class="ptr-act" style="width:${Math.min(pO,100)}%;background:${bc(pO)}"></div></div>
-          <div class="ptr-tline" style="left:${Math.min(tgtOp,100)}%"></div></div>
-        <span class="pval" style="color:${bc(pO)};font-size:9px">${pO.toFixed(1)}%</span></div>`:''}
-      ${act.inv.alloc>0?`<div class="prow"><span class="plbl">ลงทุน</span>
-        <div class="ptr-w"><div class="ptr-bg"><div class="ptr-act" style="width:${Math.min(pI,100)}%;background:${bc(pI)}"></div></div>
-          <div class="ptr-tline" style="left:${Math.min(tgtInv,100)}%"></div></div>
-        <span class="pval" style="color:${bc(pI)};font-size:9px">${pI.toFixed(1)}%</span></div>`:''}
-    </div>`;
-  }).join('');
-
-  document.getElementById('agTbody').innerHTML=list.map((a,i)=>{
-    const idx=DATA.agencies.findIndex(x=>x.n===a.n);
-    const act=agActual(a);
-    const pA=act.all.pct, pO=act.op.pct, pI=act.inv.pct;
-    const dA=+(pA-tgtAll).toFixed(2), dO=+(pO-tgtOp).toFixed(2), dI=+(pI-tgtInv).toFixed(2);
-    return`<tr onclick="openDet(${idx})">
-      <td>${i+1}</td><td style="font-weight:700;max-width:190px;text-align:left">${a.n}</td>
-      <td><span class="badge ${tClass(a.g)}">${tLbl(a.g)}</span></td>
-      <td style="text-align:right">${fmt(a.a)}</td><td style="text-align:right">${fmt(a.sp)}</td>
-      <td>${pBadge(pA)} <span class="dbadge ${diffCls(dA)}" style="font-size:9px">${diffTxt(dA)}</span></td>
-      <td>${act.op.alloc>0?pBadge(pO)+` <span class="dbadge ${diffCls(dO)}" style="font-size:9px">${diffTxt(dO)}</span>`:'—'}</td>
-      <td>${act.inv.alloc>0?pBadge(pI)+` <span class="dbadge ${diffCls(dI)}" style="font-size:9px">${diffTxt(dI)}</span>`:'—'}</td>
-    </tr>`;
-  }).join('');
+      <div class="pval" style="color:${bc(a.pa)}">${a.pa.toFixed(2)}%</div>
+    </div>`).join('');
 }
 
-function setGrp(g,btn){curGrp=g;document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderAg();}
-function setSrt(s,btn){curSrt=s;document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');renderAg();}
-function setV(v,btn){curV=v;document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('agGrid').style.display=v==='card'?'grid':'none';document.getElementById('agTblWrap').style.display=v==='table'?'block':'none';}
-
-// ============ DETAIL ============
-function openDet(idx){
-  if(!DATA||idx<0) return;
-  const a=DATA.agencies[idx];
-  prevPage=document.getElementById('pg-agencies').classList.contains('active')?'agencies':'overview';
-  updateBC('detail',a.n);
-  const act=agActual(a);
-  const tgtAll=TARGETS['ภาพรวม']['q'+curQ][1];
-  const tgtOp=TARGETS['รายจ่ายประจำ']['q'+curQ][1];
-  const tgtInv=TARGETS['รายจ่ายลงทุน']['q'+curQ][1];
-
-  const dkpis=[
-    {label:'ภาพรวม',val:act.all.pct.toFixed(2)+'%',sub:`จัดสรร ${fmt(act.all.alloc)} ลบ.`,c:'#2563a8'},
-    {label:'รายจ่ายประจำ',val:act.op.alloc>0?act.op.pct.toFixed(2)+'%':'—',sub:`จัดสรร ${fmt(act.op.alloc)} ลบ.`,c:'#059669'},
-    {label:'รายจ่ายลงทุน',val:act.inv.alloc>0?act.inv.pct.toFixed(2)+'%':'—',sub:`จัดสรร ${fmt(act.inv.alloc)} ลบ.`,c:'#ea580c'},
-  ];
-  const tgtItems=[
-    {label:'ภาพรวม',tgt:tgtAll,act:act.all.pct,color:'#2563a8',show:true},
-    {label:'รายจ่ายประจำ',tgt:tgtOp,act:act.op.pct,color:'#059669',show:act.op.alloc>0},
-    {label:'รายจ่ายลงทุน',tgt:tgtInv,act:act.inv.pct,color:'#ea580c',show:act.inv.alloc>0},
-  ].filter(x=>x.show);
-
-  const projects=a.projects||[];
-  document.getElementById('detContent').innerHTML=`
-    <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;flex-wrap:wrap">
-      <span class="badge ${tClass(a.g)}" style="font-size:11px">${tLbl(a.g)}</span>
-      <span style="font-size:15px;font-weight:800">${a.n}</span>
-    </div>
-    <div class="det-kpi">${dkpis.map(d=>`<div class="dkpi" style="--c:${d.c}">
-      <div class="dk-lbl">${d.label}</div><div class="dk-val">${d.val}</div><div class="dk-sub">${d.sub}</div>
-    </div>`).join('')}</div>
-    <div class="tgt-row">
-      <div class="tgt-title">เทียบเป้าหมาย Q${curQ} (มาตรการกรมบัญชีกลาง)</div>
-      <div class="tgt-items">${tgtItems.map(t=>{
-        const d=+(t.act-t.tgt).toFixed(2);
-        return`<div class="tgt-item">
-          <div class="ti-lbl">${t.label} | เป้า <strong style="color:${t.color}">${t.tgt}%</strong></div>
-          <div class="ti-track">
-            <div class="ti-tgt" style="width:${t.tgt}%;background:${t.color}"></div>
-            <div class="ti-act" style="width:${Math.min(t.act,100)}%;background:${bc(t.act)}"></div>
-            <div class="ti-line" style="left:${t.tgt}%"></div>
-            <div class="ti-inner"><span>${t.act.toFixed(1)}%</span>
-              <span class="dbadge ${diffCls(d)}" style="font-size:8px">${diffTxt(d)}</span></div>
-          </div>
-          <div class="ti-vals"><span style="color:var(--muted)">เป้า ${t.tgt}%</span>
-            <span style="color:${bc(t.act)};font-weight:700">${t.act.toFixed(2)}%</span></div>
-        </div>`;
-      }).join('')}</div>
-    </div>
-    <div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:9px;display:flex;align-items:center;gap:6px">
-      <span style="display:inline-block;width:4px;height:15px;background:var(--accent);border-radius:2px"></span>${projects.length} โครงการ
-    </div>
-    ${projects.map((p,pi)=>{
-      const pp=p.p||0;
-      return`<div class="proj-item" id="prj-${pi}">
-        <div class="proj-hdr" onclick="toggleP(${pi})">
-          <div class="pjname">${p.n}</div>
-          <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
-            <span style="font-size:9px;color:var(--muted)">${fmt(p.a)} ลบ.</span>${pBadge(pp)}</div>
-          <span class="chevron">›</span>
-        </div>
-        <div class="proj-body">
-          <div class="prow" style="margin-bottom:9px">
-            <span class="plbl" style="width:75px">%เบิกจ่าย</span>
-            <div class="ptr-w"><div class="ptr-bg"><div class="ptr-act" style="width:${Math.min(pp,100)}%;background:${bc(pp)}"></div></div>
-              <div class="ptr-tline" style="left:${Math.min(tgtAll,100)}%"></div></div>
-            <span class="pval" style="color:${bc(pp)}">${pp.toFixed(2)}%</span>
-          </div>
-          ${(p.items||[]).length>0?`<table class="itbl">
-            <thead><tr><th>ชื่อรหัสงบประมาณ</th><th>ประเภทงบ</th><th>แหล่งเงิน</th>
-              <th style="text-align:right">จัดสรร</th><th style="text-align:right">เบิกจ่าย</th><th style="text-align:right">%</th></tr></thead>
-            <tbody>${(p.items||[]).map(it=>`<tr>
-              <td style="max-width:220px">${it.b||'—'}</td>
-              <td><span class="ctag ${cClass(it.cat)}">${it.cat||'—'}</span></td>
-              <td style="font-size:9px;color:var(--muted)">${it.s||''}</td>
-              <td style="text-align:right">${fmt(it.a)}</td>
-              <td style="text-align:right">${fmt(it.sp)}</td>
-              <td style="text-align:right">${pBadge(it.p||0)}</td>
-            </tr>`).join('')}</tbody>
-          </table>`:'<p style="font-size:11px;color:var(--muted)">ไม่มีรายละเอียด</p>'}
-        </div>
-      </div>`;
-    }).join('')}`;
-
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('pg-detail').classList.add('active');
-}
-
-function toggleP(pi){document.getElementById(`prj-${pi}`).classList.toggle('open')}
-function backDet(){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  if(prevPage==='agencies'){document.getElementById('pg-agencies').classList.add('active');updateBC('agencies');}
-  else{document.getElementById('pg-overview').classList.add('active');goPage('overview');}
-}
+window.onload = loadData;
 </script>
 </body>
 </html>
