@@ -453,81 +453,67 @@ async function loadLiveData() {
 function parseSheetCSV(csv) {
   const lines = csv.split('\n');
   
-  // 1. หาแถว header จริงๆ (มีคำว่า "หน่วยงาน" อยู่)
-  let headerIdx = -1;
-  for(let i = 0; i < Math.min(lines.length, 30); i++) {
-    if(lines[i].includes('หน่วยงาน') && lines[i].includes('งบจัดสรร')) {
-      headerIdx = i;
-      break;
-    }
-  }
-  if(headerIdx === -1) {
-    // fallback: ลองหาจาก header ทั่วไป
-    for(let i = 0; i < Math.min(lines.length, 30); i++) {
-      if(lines[i].includes('หน่วยงาน')) { headerIdx = i; break; }
-    }
-  }
-  if(headerIdx === -1) { console.warn('ไม่พบแถว header'); return null; }
+  // 1. ค้นหาแถวที่มีคำว่า "หน่วยงาน" อัตโนมัติ (ข้ามหัวรายงาน 16 แถวเอง)
+  let headerIdx = lines.findIndex(l => l.includes('หน่วยงาน'));
+  if (headerIdx === -1) return null;
 
   const headers = parseCSVRow(lines[headerIdx]);
   const colIdx = {};
-  headers.forEach((h,i) => { colIdx[h.trim().replace(/"/g,'')] = i; });
-
-  console.log('Header row:', headerIdx, '| Columns found:', Object.keys(colIdx).filter(k=>k).slice(0,8));
+  headers.forEach((h, i) => { colIdx[h.trim().replace(/"/g, '')] = i; });
 
   const agencies = {};
-
-  // 2. วน loop ข้อมูลจริง (ข้ามแถว Grand Total และแถวว่าง)
   let lastAgency = '';
-  for(let i = headerIdx + 1; i < lines.length; i++) {
-    if(!lines[i].trim()) continue;
+
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
     const cols = parseCSVRow(lines[i]);
-    if(cols.length < 5) continue;
+    if (cols.length < 5) continue;
 
-    // ข้ามแถว Grand Total
-    const firstCell = (cols[0]||'').trim().replace(/"/g,'');
-    if(firstCell === 'Grand Total' || firstCell.startsWith('Grand')) continue;
+    // กรองแถว Grand Total
+    const firstCell = (cols[0] || '').trim().replace(/"/g, '');
+    if (firstCell.includes('Grand Total') || firstCell.includes('รวมทั้งสิ้น')) continue;
 
-    // Fill-down: ใช้หน่วยงานจากแถวบน ถ้าแถวนี้ว่าง
-    let agency = (cols[colIdx['หน่วยงาน']]||'').trim().replace(/"/g,'');
-    if(agency) lastAgency = agency;
-    else agency = lastAgency;
-    if(!agency) continue;
+    // ระบบ Fill-down ป้องกันชื่อหน่วยงานว่าง
+    let agency = (cols[colIdx['หน่วยงาน']] || '').trim().replace(/"/g, '');
+    if (agency) lastAgency = agency; else agency = lastAgency;
+    if (!agency) continue;
 
-    // 3. หารด้วย 1,000,000 เพื่อแปลงจาก บาท → ล้านบาท
-    const rawAlloc = pNum(cols[colIdx['งบจัดสรรถือจ่ายจังหวัด (ล้านบาท)']]);
-    const rawSpent = pNum(cols[colIdx['เบิกจ่ายทั้งสิ้น (ล้านบาท)']]);
-    const alloc = rawAlloc / 1000000;
-    const spent = rawSpent / 1000000;
+    const getNum = (v) => parseFloat(String(v || '0').replace(/[",]/g, '')) || 0;
 
-    const project = (cols[colIdx['งาน/โครงการ']]||'').trim().replace(/"/g,'');
-    const budget  = (cols[colIdx['ชื่อรหัสงบประมาณ']]||'').trim().replace(/"/g,'');
-    const source  = (cols[colIdx['แหล่งของเงิน']]||'').trim().replace(/"/g,'');
-    
-    // จัดประเภทหน่วยงาน (ราชการ / อปท.)
-    let g = 'ราชการ';
-    if(['อบจ.','เทศบาล','อบต.','องค์การบริหาร'].some(x=>agency.includes(x))) {
-      if(agency.includes('อบจ.')) g='อบจ.';
-      else if(agency.includes('เทศบาล')) g='เทศบาล';
-      else g='อบต.';
+    // ดึงค่าตามชื่อคอลัมน์จริงใน Google Sheets ของคุณ
+    const alloc = getNum(cols[colIdx['งบจัดสรรถือจ่ายจังหวัด (ล้านบาท)']]);
+    const spent = getNum(cols[colIdx['เบิกจ่ายทั้งสิ้น (ล้านบาท)']]);
+    const budgetType = (cols[colIdx['งบรายจ่าย']] || '').trim();
+
+    if (!agencies[agency]) {
+      agencies[agency] = { 
+        n: agency, a: 0, sp: 0, g: getGroup(agency), projects: [], 
+        grp: { 'งบลงทุน': { a: 0, s: 0, p: 0 }, 'งบประจำ': { a: 0, s: 0, p: 0 }, 'เงินอุดหนุนเฉพาะกิจ': { a: 0, s: 0, p: 0 }, 'งบกลาง': { a: 0, s: 0, p: 0 } } 
+      };
     }
 
-    if(!agencies[agency]) agencies[agency]={n:agency,a:0,sp:0,g,projects:{}};
     agencies[agency].a += alloc;
     agencies[agency].sp += spent;
 
-    if(project && alloc > 0) {
-      if(!agencies[agency].projects[project]) agencies[agency].projects[project]={n:project,a:0,sp:0,items:[]};
-      agencies[agency].projects[project].a += alloc;
-      agencies[agency].projects[project].sp += spent;
-      if(budget) agencies[agency].projects[project].items.push({
-        b:budget.substring(0,60), s:source,
-        a:Math.round(alloc*10000)/10000,
-        sp:Math.round(spent*10000)/10000
-      });
+    // แยกประเภทงบ
+    if (budgetType.includes('ลงทุน')) {
+      agencies[agency].grp['งบลงทุน'].a += alloc;
+      agencies[agency].grp['งบลงทุน'].s += spent;
+    } else {
+      agencies[agency].grp['งบประจำ'].a += alloc;
+      agencies[agency].grp['งบประจำ'].s += spent;
     }
   }
 
+  const list = Object.values(agencies).map(a => ({
+    ...a, pa: a.a > 0 ? (a.sp / a.a * 100) : 0
+  })).sort((x, y) => y.a - x.a);
+
+  const ta = list.reduce((s, x) => s + x.a, 0);
+  const ts = list.reduce((s, x) => s + x.sp, 0);
+
+  return { summary: { a: ta, s: ts, p: ta > 0 ? (ts / ta * 100) : 0 }, agencies: list };
+}
   const list = Object.values(agencies).map(a => {
     const projs = Object.values(a.projects).map(p=>({...p,
       a:Math.round(p.a*100)/100, sp:Math.round(p.sp*100)/100,
