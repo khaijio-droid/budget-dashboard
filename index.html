@@ -2545,93 +2545,83 @@ const TRK_STATUS = {
   inprog: {label:'กำลังดำเนินการ', cls:'trk-s-inprog', icon:'🔵'},
   done:   {label:'แล้วเสร็จ',     cls:'trk-s-done',   icon:'✅'},
   issue:  {label:'ติดปัญหา',      cls:'trk-s-issue',  icon:'🔴'},
-};
-
-let trkStore = (function(){
-  try { return JSON.parse(localStorage.getItem(TRK_STORE_KEY) || '{}'); }
-  catch(e) { return {}; }
-})();
-
-function trkSave(){ localStorage.setItem(TRK_STORE_KEY, JSON.stringify(trkStore)); }
-function trkPctColor(p){ return p>=80?'#16a34a':p>=50?'#f59e0b':p>=20?'#ea580c':'#dc2626'; }
-function trkFmt(n){ return n!=null?n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'; }
-
-// ฟังก์ชันดึงรายชื่อหน่วยงานมาใส่ในตัวกรอง (Filter)
-function trkBuildFilter(){
-  if(!window.DATA || !DATA.agencies) return;
-  const agList = [...new Set(DATA.agencies.map(a => a.n))].sort();
-  const sel = document.getElementById('trkFilterAg');
-  if(sel && sel.options.length <= 1){
-    agList.forEach(a => {
-      const o = document.createElement('option');
-      o.value = a;
-      o.textContent = a;
-      sel.appendChild(o);
-    });
-  }
-}
-
-// ฟังก์ชันแสดงตารางติดตามโครงการ
-function renderTracker(){
-  if(!window.DATA) return;
-  const q = (document.getElementById('trkSearch')?.value || '').toLowerCase();
-  const agFilter = document.getElementById('trkFilterAg')?.value || '';
-  const stFilter = document.getElementById('trkFilterSt')?.value || '';
+function parseSheetCSV(csv) {
+  const lines = csv.split('\n');
   
-  let html = '';
-  let count = 0;
+  // 1. ค้นหาแถวที่มีคำว่า "หน่วยงาน" อัตโนมัติ (ข้ามหัวรายงาน 16 แถวเอง)
+  let headerIdx = lines.findIndex(l => l.includes('หน่วยงาน'));
+  if (headerIdx === -1) return null;
 
-  DATA.agencies.forEach(agency => {
-    if(agFilter && agency.n !== agFilter) return;
+  const headers = parseCSVRow(lines[headerIdx]);
+  const colIdx = {};
+  headers.forEach((h, i) => { colIdx[h.trim().replace(/"/g, '')] = i; });
 
-    (agency.projects || []).forEach(p => {
-      // แสดงเฉพาะงบลงทุนในหน้า Tracker
-      const investItems = (p.items || []).filter(it => it.cat === 'งบลงทุน');
-      
-      investItems.forEach(it => {
-        if(q && !agency.n.toLowerCase().includes(q) && !p.n.toLowerCase().includes(q) && !it.b.toLowerCase().includes(q)) return;
-        
-        count++;
-        const id = `${agency.n}-${it.b}`; // สร้าง ID อ้างอิง
-        const rec = trkStore[id] || {};
-        const pst = rec.status || 'none';
-        const sm = TRK_STATUS[pst];
-        const prog = rec.progress || 0;
+  const agencies = {};
+  let lastAgency = '';
 
-        html += `
-          <tr class="${pst !== 'none' ? 'trk-row-filled' : ''}">
-            <td class="text-center">${count}</td>
-            <td>
-              <div style="font-size:10px; font-weight:700; color:var(--primary2)">${agency.n}</div>
-              <div style="font-size:11px; margin-top:2px;">${it.b}</div>
-            </td>
-            <td class="text-right font-bold">${trkFmt(it.a)}</td>
-            <td class="text-center">
-              <span class="trk-status-badge ${sm.cls}">${sm.icon} ${sm.label}</span>
-            </td>
-            <td>
-              <div style="font-weight:700; color:${trkPctColor(prog)}">${prog}%</div>
-              <div class="trk-mini-bar"><div class="trk-mini-fill" style="width:${prog}%; background:${trkPctColor(prog)}"></div></div>
-            </td>
-            <td class="text-center">
-              <button class="trk-edit-btn" onclick="trkOpenModal('${agency.n}', '${it.b}')">✏️</button>
-            </td>
-          </tr>`;
-      });
-    });
-  });
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    const cols = parseCSVRow(lines[i]);
+    if (cols.length < 5) continue;
 
-  const tbody = document.getElementById('trkTbody');
-  if(tbody) tbody.innerHTML = html;
-  const countEl = document.getElementById('trkCount');
-  if(countEl) countEl.textContent = `พบ ${count} รายการ`;
+    const firstCell = (cols[0] || '').trim().replace(/"/g, '');
+    if (firstCell.includes('Grand Total') || firstCell.includes('รวมทั้งสิ้น')) continue;
+
+    let agency = (cols[colIdx['หน่วยงาน']] || '').trim().replace(/"/g, '');
+    if (agency) lastAgency = agency; else agency = lastAgency;
+    if (!agency) continue;
+
+    const getNum = (v) => parseFloat(String(v || '0').replace(/[",]/g, '')) || 0;
+
+    const alloc = getNum(cols[colIdx['งบจัดสรรถือจ่ายจังหวัด (ล้านบาท)']]);
+    const spent = getNum(cols[colIdx['เบิกจ่ายทั้งสิ้น (ล้านบาท)']]);
+    const budgetType = (cols[colIdx['งบรายจ่าย']] || '').trim();
+
+    if (!agencies[agency]) {
+      agencies[agency] = { 
+        n: agency, a: 0, sp: 0, g: (agency.includes('อบจ.') || agency.includes('เทศบาล') || agency.includes('อบต.')) ? 'อปท.' : 'ราชการ', 
+        projects: [], 
+        grp: { 'งบลงทุน': { a: 0, s: 0, p: 0 }, 'งบประจำ': { a: 0, s: 0, p: 0 }, 'เงินอุดหนุนเฉพาะกิจ': { a: 0, s: 0, p: 0 }, 'งบกลาง': { a: 0, s: 0, p: 0 } } 
+      };
+    }
+
+    agencies[agency].a += alloc;
+    agencies[agency].sp += spent;
+
+    if (budgetType.includes('ลงทุน')) {
+      agencies[agency].grp['งบลงทุน'].a += alloc;
+      agencies[agency].grp['งบลงทุน'].s += spent;
+    } else {
+      agencies[agency].grp['งบประจำ'].a += alloc;
+      agencies[agency].grp['งบประจำ'].s += spent;
+    }
+  }
+
+  const list = Object.values(agencies).map(a => ({
+    ...a, pa: a.a > 0 ? (a.sp / a.a * 100) : 0
+  })).sort((x, y) => y.a - x.a);
+
+  const ta = list.reduce((s, x) => s + x.a, 0);
+  const ts = list.reduce((s, x) => s + x.sp, 0);
+
+  return { summary: { a: ta, s: ts, p: ta > 0 ? (ts / ta * 100) : 0 }, agencies: list };
 }
+
+function parseCSVRow(line) {
+  const r=[];let c='',inQ=false;
+  for(const ch of line){if(ch==='"'){if(inQ&&line[line.indexOf(ch)+1]==='"'){c+='"';}else{inQ=!inQ;}}else if(ch===','&&!inQ){r.push(c.trim());c='';}else c+=ch;}
+  r.push(c.trim());return r;
+}
+
+// ========== TRACKER MODULE ==========
+const TRK_STORE_KEY = 'acr_invest_tracker_2569';
 const TRK_STATUS = {
   none:   {label:'ยังไม่เริ่ม',   cls:'trk-s-none',   icon:'⬜'},
   inprog: {label:'กำลังดำเนินการ', cls:'trk-s-inprog', icon:'🔵'},
   done:   {label:'แล้วเสร็จ',     cls:'trk-s-done',   icon:'✅'},
   issue:  {label:'ติดปัญหา',      cls:'trk-s-issue',  icon:'🔴'},
 };
+
 let trkStore = (function(){
   try{ return JSON.parse(localStorage.getItem(TRK_STORE_KEY)||'{}'); }
   catch(e){ return {}; }
@@ -2641,242 +2631,28 @@ function trkSave(){ localStorage.setItem(TRK_STORE_KEY, JSON.stringify(trkStore)
 function trkPctColor(p){ return p>=80?'#16a34a':p>=50?'#f59e0b':p>=20?'#ea580c':'#dc2626'; }
 function trkFmt(n){ return n!=null?n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}):'—'; }
 
-function trkBuildFilter(){
-  const ag = [...new Set(TRK_PROJECTS.map(p=>p.agency))].sort();
-  const sel = document.getElementById('trkFilterAg');
-  if(sel && sel.options.length <= 1){
-    ag.forEach(a=>{ const o=document.createElement('option'); o.value=a; o.textContent=a; sel.appendChild(o); });
-  }
-}
-
 function renderTracker(){
-  const q  = (document.getElementById('trkSearch')?.value||'').toLowerCase();
-  const ag = document.getElementById('trkFilterAg')?.value||'';
-  const st = document.getElementById('trkFilterSt')?.value||'';
-  const fi = document.getElementById('trkFilterFi')?.value||'';
-
-  const list = TRK_PROJECTS.filter(p=>{
-    if(q && !p.agency.toLowerCase().includes(q) && !p.name.toLowerCase().includes(q) && !p.project.toLowerCase().includes(q)) return false;
-    if(ag && p.agency !== ag) return false;
-    const rec = trkStore[p.id]||{};
-    const pst = rec.status||'none';
-    if(st && pst !== st) return false;
-    const filled = pst!=='none' || rec.progress || rec.dateStart || rec.issue || rec.note;
-    if(fi==='filled' && !filled) return false;
-    if(fi==='empty'  && filled)  return false;
-    return true;
-  });
-
-  const cnt = document.getElementById('trkCount');
-  if(cnt) cnt.textContent = `แสดง ${list.length} จาก ${TRK_PROJECTS.length} รายการ`;
-
   const tbody = document.getElementById('trkTbody');
-  if(!tbody) return;
-
-  tbody.innerHTML = list.map((p,i)=>{
-    const rec  = trkStore[p.id]||{};
-    const pst  = rec.status||'none';
-    const sm   = TRK_STATUS[pst];
-    const prog = rec.progress||0;
-    const pc   = trkPctColor(p.pct_disbursed);
-    const filled = pst!=='none'||prog||rec.dateStart||rec.issue||rec.note;
-
-    const progressCell = prog > 0
-      ? `<div style="font-weight:700;color:${trkPctColor(prog)};font-size:12px">${prog}%</div>
-         <div class="trk-mini-bar"><div class="trk-mini-fill" style="width:${prog}%;background:${trkPctColor(prog)}"></div></div>`
-      : `<span style="color:var(--muted)">—</span>`;
-
-    return `<tr class="${filled?'trk-row-filled':''}">
-      <td style="color:var(--muted)">${i+1}</td>
-      <td>
-        <div style="font-size:10px;color:var(--primary2);font-weight:700">${p.agency}</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px;line-height:1.3">${p.project.substring(0,45)}${p.project.length>45?'...':''}</div>
-      </td>
-      <td><div style="font-size:11px;font-weight:600;line-height:1.4">${p.name}</div></td>
-      <td style="text-align:right;font-weight:700">${trkFmt(p.alloc)}</td>
-      <td style="text-align:center">
-        <span style="background:${pc};color:#fff;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700">${p.pct_disbursed.toFixed(1)}%</span>
-      </td>
-      <td><span class="trk-status-badge ${sm.cls}">${sm.icon} ${sm.label}</span></td>
-      <td style="text-align:center">${progressCell}</td>
-      <td style="font-size:11px;color:var(--muted)">${rec.dateStart||'—'}</td>
-      <td style="font-size:11px;color:var(--muted)">${rec.dateEnd||'—'}</td>
-      <td style="font-size:11px;color:#dc2626;line-height:1.4">${rec.issue||''}</td>
-      <td style="font-size:11px;color:var(--muted);line-height:1.4">${rec.note||''}</td>
-      <td style="text-align:center">
-        <button class="trk-edit-btn" data-id="${p.id}" onclick="trkOpenModal(this.dataset.id)">✏️</button>
-      </td>
-    </tr>`;
-  }).join('');
-
-  trkUpdateStats();
-}
-
-function trkUpdateStats(){
-  const c = {none:0,inprog:0,done:0,issue:0,filled:0};
-  TRK_PROJECTS.forEach(p=>{
-    const st = (trkStore[p.id]||{}).status||'none';
-    c[st] = (c[st]||0) + 1;
-    if(st !== 'none') c.filled++;
-  });
-  ['none','inprog','done','issue','filled'].forEach(k=>{
-    const el = document.getElementById('trk-'+k);
-    if(el) el.textContent = c[k];
-  });
-  const nb = document.getElementById('nb-trk');
-  if(nb) nb.textContent = c.filled;
-}
-
-function trkOpenModal(id){
-  const p = TRK_PROJECTS.find(x=>x.id===id);
-  if(!p) return;
-  const rec = trkStore[id]||{};
-  document.getElementById('trkModalId').value    = id;
-  document.getElementById('trkModalTitle').textContent = p.name.substring(0,60)+(p.name.length>60?'...':'');
-  document.getElementById('trkModalSub').innerHTML = `
-    <strong>${p.agency}</strong> | จัดสรร <strong>${trkFmt(p.alloc)}</strong> ล้านบาท |
-    เบิกจ่ายแล้ว <strong style="color:${trkPctColor(p.pct_disbursed)}">${p.pct_disbursed.toFixed(1)}%</strong>`;
-  document.getElementById('trkMStatus').value = rec.status||'none';
-  document.getElementById('trkMRange').value  = rec.progress||0;
-  document.getElementById('trkMNum').value    = rec.progress||0;
-  document.getElementById('trkMStart').value  = rec.dateStart||'';
-  document.getElementById('trkMEnd').value    = rec.dateEnd||'';
-  document.getElementById('trkMIssue').value  = rec.issue||'';
-  document.getElementById('trkMNote').value   = rec.note||'';
-  document.getElementById('trkModalBg').classList.add('open');
+  if(tbody) tbody.innerHTML = '<tr><td colspan="12" class="text-center p-10 text-gray-400">กรุณาเลือกหน่วยงานหรือค้นหาโครงการ</td></tr>';
 }
 
 function trkSaveModal(){
   const id = document.getElementById('trkModalId').value;
   trkStore[id] = {
-    status:    document.getElementById('trkMStatus').value,
-    progress:  parseInt(document.getElementById('trkMNum').value)||0,
+    status: document.getElementById('trkMStatus').value,
+    progress: parseInt(document.getElementById('trkMNum').value)||0,
     dateStart: document.getElementById('trkMStart').value,
-    dateEnd:   document.getElementById('trkMEnd').value,
-    issue:     document.getElementById('trkMIssue').value.trim(),
-    note:      document.getElementById('trkMNote').value.trim(),
-    updatedAt: new Date().toISOString(),
+    dateEnd: document.getElementById('trkMEnd').value,
+    issue: document.getElementById('trkMIssue').value.trim(),
+    note: document.getElementById('trkMNote').value.trim(),
+    updatedAt: new Date().toISOString()
   };
   trkSave();
   document.getElementById('trkModalBg').classList.remove('open');
   renderTracker();
 }
 
-function trkExport(){
-  const headers = ['#','หน่วยงาน','โครงการ','รายการ','แหล่งเงิน','จัดสรร(ลบ)','%เบิกจ่าย','สถานะ','%คืบหน้า','วันเริ่ม','วันสิ้นสุด','ปัญหา','หมายเหตุ'];
-  const rows = TRK_PROJECTS.map((p,i)=>{
-    const rec = trkStore[p.id]||{};
-    return [i+1, p.agency, p.project, p.name, p.source, p.alloc, p.pct_disbursed,
-            TRK_STATUS[rec.status||'none'].label, rec.progress||0,
-            rec.dateStart||'', rec.dateEnd||'', rec.issue||'', rec.note||''];
-  });
-  const esc = v => `"${String(v).replace(/"/g,'""')}"`;
-  const csv = [headers, ...rows].map(r => r.map(esc).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'ACR_ติดตามงบลงทุน_2569.csv';
-  a.click();
-}
-
-function trkClear(){
-  if(!confirm('ต้องการล้างข้อมูลที่กรอกทั้งหมดหรือไม่?')) return;
-  localStorage.removeItem(TRK_STORE_KEY);
-  trkStore = {};
-  renderTracker();
-}
-
+window.onload = loadLiveData;
 </script>
-
-<!-- ========== TRACKER PAGE ========== -->
-<div class="pg-tracker" id="pg-tracker">
-  <div class="trk-stats">
-    <div class="trk-stat"><div class="trk-stat-num" id="trk-total" style="color:var(--primary2)">597</div><div class="trk-stat-lbl">ทั้งหมด</div></div>
-    <div style="width:1px;height:30px;background:var(--border)"></div>
-    <div class="trk-stat"><div class="trk-stat-num" id="trk-none" style="color:#475569">—</div><div class="trk-stat-lbl">ยังไม่เริ่ม</div></div>
-    <div class="trk-stat"><div class="trk-stat-num" id="trk-inprog" style="color:#1d4ed8">—</div><div class="trk-stat-lbl">ดำเนินการ</div></div>
-    <div class="trk-stat"><div class="trk-stat-num" id="trk-done" style="color:#15803d">—</div><div class="trk-stat-lbl">แล้วเสร็จ</div></div>
-    <div class="trk-stat"><div class="trk-stat-num" id="trk-issue" style="color:#dc2626">—</div><div class="trk-stat-lbl">ติดปัญหา</div></div>
-    <div style="width:1px;height:30px;background:var(--border)"></div>
-    <div class="trk-stat"><div class="trk-stat-num" id="trk-filled" style="color:var(--accent)">0</div><div class="trk-stat-lbl">กรอกแล้ว</div></div>
-    <div style="margin-left:auto;display:flex;gap:8px">
-      <button onclick="trkExport()" style="background:var(--accent);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">📥 Export CSV</button>
-      <button onclick="trkClear()" style="background:#fee2e2;color:#dc2626;border:none;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🗑️ ล้างข้อมูล</button>
-    </div>
-  </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-    <input type="text" id="trkSearch" placeholder="🔍 ค้นหาโครงการ / หน่วยงาน..." oninput="renderTracker()" style="padding:6px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:inherit;min-width:220px;outline:none">
-    <select id="trkFilterAg" onchange="renderTracker()" style="padding:6px 10px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:inherit;outline:none;background:#fff">
-      <option value="">— ทุกหน่วยงาน —</option>
-    </select>
-    <select id="trkFilterSt" onchange="renderTracker()" style="padding:6px 10px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:inherit;outline:none;background:#fff">
-      <option value="">— ทุกสถานะ —</option>
-      <option value="none">ยังไม่เริ่ม</option>
-      <option value="inprog">กำลังดำเนินการ</option>
-      <option value="done">แล้วเสร็จ</option>
-      <option value="issue">ติดปัญหา</option>
-    </select>
-    <select id="trkFilterFi" onchange="renderTracker()" style="padding:6px 10px;border:1px solid var(--border);border-radius:20px;font-size:12px;font-family:inherit;outline:none;background:#fff">
-      <option value="">— ทั้งหมด —</option>
-      <option value="filled">กรอกแล้ว</option>
-      <option value="empty">ยังไม่กรอก</option>
-    </select>
-    <span id="trkCount" style="font-size:11px;color:var(--muted);margin-left:auto"></span>
-  </div>
-  <div style="overflow-x:auto">
-    <table class="trk-tbl">
-      <thead><tr>
-        <th>#</th><th style="min-width:130px">หน่วยงาน</th>
-        <th style="min-width:190px">รายการโครงการ</th>
-        <th style="text-align:right">จัดสรร(ลบ.)</th>
-        <th style="text-align:center">%เบิก</th>
-        <th style="min-width:140px">สถานะ</th>
-        <th style="text-align:center;width:80px">%คืบหน้า</th>
-        <th style="width:105px">วันเริ่ม</th>
-        <th style="width:105px">วันสิ้นสุด</th>
-        <th style="min-width:150px">ปัญหา/อุปสรรค</th>
-        <th style="min-width:150px">หมายเหตุ</th>
-        <th style="text-align:center;width:55px">แก้ไข</th>
-      </tr></thead>
-      <tbody id="trkTbody"></tbody>
-    </table>
-  </div>
-</div>
-<!-- TRACKER MODAL -->
-<div class="trk-modal-bg" id="trkModalBg" onclick="if(event.target.id==='trkModalBg')document.getElementById('trkModalBg').classList.remove('open')">
-  <div class="trk-modal">
-    <h2 id="trkModalTitle">แก้ไขสถานะโครงการ</h2>
-    <div class="trk-modal-sub" id="trkModalSub"></div>
-    <input type="hidden" id="trkModalId">
-    <div class="trk-form-row">
-      <label>สถานะโครงการ</label>
-      <select id="trkMStatus">
-        <option value="none">⬜ ยังไม่เริ่ม</option>
-        <option value="inprog">🔵 กำลังดำเนินการ</option>
-        <option value="done">✅ แล้วเสร็จ</option>
-        <option value="issue">🔴 ติดปัญหา</option>
-      </select>
-    </div>
-    <div class="trk-form-row">
-      <label>% ความคืบหน้าจริง (ผลงาน)</label>
-      <div class="trk-pct-row">
-        <input type="range" id="trkMRange" min="0" max="100" step="1" value="0" oninput="document.getElementById('trkMNum').value=this.value">
-        <input type="number" class="trk-pnum" id="trkMNum" min="0" max="100" value="0" oninput="document.getElementById('trkMRange').value=this.value">
-        <span style="font-weight:700;color:var(--primary2)">%</span>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="trk-form-row"><label>วันที่เริ่มต้นสัญญา</label><input type="date" id="trkMStart"></div>
-      <div class="trk-form-row"><label>วันที่สิ้นสุดสัญญา</label><input type="date" id="trkMEnd"></div>
-    </div>
-    <div class="trk-form-row"><label>ปัญหา / อุปสรรค</label><textarea id="trkMIssue" placeholder="ระบุปัญหาหรืออุปสรรค (ถ้ามี)"></textarea></div>
-    <div class="trk-form-row"><label>หมายเหตุเพิ่มเติม</label><textarea id="trkMNote" placeholder="หมายเหตุ / ข้อมูลเพิ่มเติม"></textarea></div>
-    <div class="trk-modal-btns">
-      <button class="trk-btn-cancel" onclick="document.getElementById('trkModalBg').classList.remove('open')">ยกเลิก</button>
-      <button class="trk-btn-save" onclick="trkSaveModal()">💾 บันทึก</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
