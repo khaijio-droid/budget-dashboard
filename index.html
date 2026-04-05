@@ -435,7 +435,7 @@ function parseCSV(csv){
   };
 
   const dataRows=[];
-  for(let i=1;i<lines.length;i++){
+  for(let i=17;i<lines.length;i++){
     const row=parseCSVLine(lines[i]);
     if(!row[0]||row[0]==='Grand Total') continue;
     dataRows.push(row);
