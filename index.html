@@ -180,33 +180,6 @@ tbody td:first-child{text-align:left;font-weight:700}
 .ctag{display:inline-block;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:700}
 .ci{background:#dbeafe;color:#1e40af}.co{background:#dcfce7;color:#166534}
 .cs{background:#ede9fe;color:#6d28d9}.cc{background:#f1f5f9;color:#475569}
-/* QDATA MODAL */
-.qmod-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;align-items:center;justify-content:center}
-.qmod-bg.open{display:flex}
-.qmod{background:#fff;border-radius:16px;padding:22px 24px;width:min(500px,95vw);box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.qmod h3{font-size:14px;font-weight:800;color:var(--primary);margin-bottom:4px}
-.qmod-sub{font-size:11px;color:var(--muted);margin-bottom:16px}
-.qmod-tabs{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap}
-.qmt{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:#fff;font-family:inherit;transition:.15s}
-.qmt.active{background:var(--primary2);color:#fff;border-color:var(--primary2)}
-.qmt.has-data::after{content:'✓';margin-left:4px;color:#16a34a}
-.qmt.active.has-data::after{color:#a5f3c0}
-.qmod-fields{display:grid;gap:10px;margin-bottom:16px}
-.qfield{display:grid;grid-template-columns:130px 1fr auto;gap:8px;align-items:center}
-.qfield label{font-size:12px;font-weight:600;color:var(--text)}
-.qfield input{padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-size:13px;font-family:inherit;outline:none;width:100%;transition:.2s}
-.qfield input:focus{border-color:var(--primary2);box-shadow:0 0 0 3px rgba(37,99,168,.1)}
-.qfield .punit{font-size:12px;color:var(--muted);font-weight:700}
-.qmod-info{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;font-size:11px;color:#92400e;margin-bottom:14px}
-.qmod-btns{display:flex;gap:8px;justify-content:flex-end}
-.qbtn{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;border:none}
-.qbtn-save{background:var(--primary2);color:#fff}.qbtn-save:hover{background:var(--primary)}
-.qbtn-del{background:#fee2e2;color:#dc2626}.qbtn-del:hover{background:#fecaca}
-.qbtn-cancel{background:#f1f5f9;color:var(--muted)}.qbtn-cancel:hover{background:#e2e8f0}
-/* INJECT BUTTON */
-.inject-btn{padding:5px 11px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--primary2);transition:.15s;margin-left:8px}
-.inject-btn:hover{background:var(--primary2);color:#fff;border-color:var(--primary2)}
-
 /* INVEST PAGE */
 .inv-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:7px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;cursor:pointer;transition:.15s}
 .inv-row:hover{box-shadow:0 3px 12px rgba(0,0,0,.07);border-color:var(--primary2)}
@@ -244,15 +217,11 @@ tbody td:first-child{text-align:left;font-weight:700}
     <button class="qtab cur active" onclick="setQ(3,this)">ไตรมาส 3<span class="qtab-sub">เม.ย.–มิ.ย. 68 ▶ ปัจจุบัน</span></button>
     <button class="qtab" onclick="setQ(4,this)">ไตรมาส 4<span class="qtab-sub">ก.ค.–ก.ย. 68</span></button>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-    <button class="inject-btn" onclick="openQMod()">📝 บันทึกผลจริงรายไตรมาส</button>
-    <span style="font-size:11px;color:var(--muted)" id="qdataStatus"></span>
-  </div>
   <div class="legend">
     <div class="leg"><div class="ldot2" style="background:#2563a8;opacity:.35"></div>เป้าหมาย</div>
     <div class="leg"><div class="ldot2" style="background:#16a34a"></div>จริง (สูงกว่าเป้า)</div>
     <div class="leg"><div class="ldot2" style="background:#dc2626"></div>จริง (ต่ำกว่าเป้า)</div>
-    <div class="leg" style="color:var(--muted)">⚠️ ข้อมูลจริง ณ ไตรมาส 3 (เม.ย.–มิ.ย. 2568)</div>
+    <div class="leg" style="color:var(--muted)">📊 ผลจริงจาก GFMIS เทียบกับเป้าหมายของแต่ละไตรมาส</div>
   </div>
   <div class="cmp-grid" id="cmpGrid"></div>
   <div class="tbl-section">
@@ -355,102 +324,6 @@ function getActual(){
   };
 }
 
-// ======== QDATA (per-quarter actuals in localStorage) ========
-const QDATA_KEY = 'acr_qdata_2568';
-
-function loadQData(){
-  try{ return JSON.parse(localStorage.getItem(QDATA_KEY)||'{}'); }
-  catch(e){ return {}; }
-}
-function saveQDataStore(qk, vals){
-  const d = loadQData();
-  d[qk] = vals;
-  localStorage.setItem(QDATA_KEY, JSON.stringify(d));
-}
-function deleteQDataStore(qk){
-  const d = loadQData();
-  delete d[qk];
-  localStorage.setItem(QDATA_KEY, JSON.stringify(d));
-}
-function getQActual(qk){
-  // qk = 'q1','q2','q3','q4'
-  return loadQData()[qk] || null;
-}
-function autoSaveCurrentQ(){
-  // บันทึก live data เป็นข้อมูลจริงของไตรมาสปัจจุบัน (Q3) อัตโนมัติ
-  const ACT = getActual();
-  const CUR_Q = 'q3';
-  const existing = getQActual(CUR_Q);
-  // Auto-save เฉพาะถ้า live data ต่างจากที่เก็บไว้มากกว่า 0.1% หรือยังไม่มีข้อมูล
-  const newAll = ACT['ภาพรวม'].pct;
-  if(!existing || Math.abs((existing.all||0)-newAll)>0.09){
-    saveQDataStore(CUR_Q,{
-      all: ACT['ภาพรวม'].pct,
-      op:  ACT['รายจ่ายประจำ'].pct,
-      inv: ACT['รายจ่ายลงทุน'].pct,
-      auto: true
-    });
-  }
-}
-
-// Modal open/save/delete
-let qmodQ = 'q3';
-function openQMod(q){
-  qmodQ = q || 'q'+Math.min(4,Math.max(1,3));
-  buildQModTabs();
-  loadQModFields(qmodQ);
-  document.getElementById('qmodBg').classList.add('open');
-}
-function buildQModTabs(){
-  const d = loadQData();
-  const labels=['Q1 (ต.ค.-ธ.ค.)','Q2 (ม.ค.-มี.ค.)','Q3 (เม.ย.-มิ.ย.)','Q4 (ก.ค.-ก.ย.)'];
-  document.getElementById('qmodTabs').innerHTML = ['q1','q2','q3','q4'].map((qk,i)=>`
-    <button class="qmt${qmodQ===qk?' active':''}${d[qk]?' has-data':''}" onclick="switchQMod('${qk}')">${labels[i]}</button>
-  `).join('');
-}
-function switchQMod(qk){
-  qmodQ = qk;
-  buildQModTabs();
-  loadQModFields(qk);
-}
-function loadQModFields(qk){
-  const d = getQActual(qk);
-  document.getElementById('qf_all').value = d ? d.all : '';
-  document.getElementById('qf_op').value  = d ? d.op  : '';
-  document.getElementById('qf_inv').value = d ? d.inv : '';
-  const labels=['Q1 ต.ค.-ธ.ค. 67','Q2 ม.ค.-มี.ค. 68','Q3 เม.ย.-มิ.ย. 68 (ปัจจุบัน)','Q4 ก.ค.-ก.ย. 68'];
-  const qi = ['q1','q2','q3','q4'].indexOf(qk);
-  const isAuto = d && d.auto;
-  document.getElementById('qmodInfo').innerHTML = qi===2
-    ? `ไตรมาส 3 จะ<strong>โหลดอัตโนมัติ</strong>จากข้อมูล Live ทุกครั้งที่กดอัปเดต${d?` — ปัจจุบัน: <b>${d.all}%</b>`:''}`
-    : `กรอกผลการเบิกจ่าย<strong>จริง ณ สิ้น${labels[qi]}</strong> — ใช้สำหรับเปรียบเทียบกับเป้าหมาย`;
-}
-function saveQData(){
-  const all = parseFloat(document.getElementById('qf_all').value);
-  const op  = parseFloat(document.getElementById('qf_op').value);
-  const inv = parseFloat(document.getElementById('qf_inv').value);
-  if(isNaN(all)){ showToast('กรุณากรอก % ภาพรวม','warn'); return; }
-  saveQDataStore(qmodQ, {all: isNaN(all)?null:all, op: isNaN(op)?null:op, inv: isNaN(inv)?null:inv});
-  document.getElementById('qmodBg').classList.remove('open');
-  renderOverview();
-  updateQDataStatus();
-  showToast(`✅ บันทึกข้อมูลจริง ${qmodQ.toUpperCase()} แล้ว`,'success');
-}
-function delQData(){
-  if(!confirm(`ลบข้อมูลจริง ${qmodQ.toUpperCase()} ?`)) return;
-  deleteQDataStore(qmodQ);
-  document.getElementById('qmodBg').classList.remove('open');
-  renderOverview();
-  updateQDataStatus();
-  showToast(`🗑 ลบข้อมูล ${qmodQ.toUpperCase()} แล้ว`,'warn');
-}
-function updateQDataStatus(){
-  const d = loadQData();
-  const have = ['q1','q2','q3','q4'].filter(q=>d[q]).map(q=>q.toUpperCase());
-  const el = document.getElementById('qdataStatus');
-  if(el) el.textContent = have.length ? `มีข้อมูลจริง: ${have.join(', ')}` : 'ยังไม่มีข้อมูลจริงรายไตรมาส';
-}
-
 // ======== PAGE NAV ========
 function goPage(pg,grpFilter){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('active'));
@@ -539,41 +412,31 @@ function renderOverview(){
 
   // CMP CARDS
   const qk='q'+curQ;
-  const QALL = loadQData();
-  const catField = {'ภาพรวม':'all','รายจ่ายประจำ':'op','รายจ่ายลงทุน':'inv'};  // ข้อมูลจริงทุกไตรมาสจาก localStorage
-  const qCurData = QALL[qk] || null;
-
-  // map category key → field key in QALL
-  const catField = {'ภาพรวม':'all','รายจ่ายประจำ':'op','รายจ่ายลงทุน':'inv'};
-
+  // ใช้ข้อมูลจริงปัจจุบัน เทียบกับเป้าของไตรมาสที่เลือก
   document.getElementById('cmpGrid').innerHTML=Object.keys(TARGETS).map(k=>{
     const T=TARGETS[k],act=ACT[k],color=TC[k];
     const tgtNow=T[qk][1];
-    const cf=catField[k];
-    // ข้อมูลจริงของไตรมาสที่เลือก
-    const actualPct = qCurData ? (qCurData[cf]??qCurData.all??null) : null;
-    const isReal = actualPct !== null;
-    const diff = isReal ? +(actualPct-tgtNow).toFixed(2) : null;
-    const aColor = isReal ? bc(actualPct) : color;
-    const gAct = isReal ? Math.min(actualPct,100)/100*283 : 0;
-    const gTgt = Math.min(tgtNow,100)/100*283;
+    const diff=+(act.pct-tgtNow).toFixed(2);
+    const aColor=bc(act.pct);
+    const gAct=Math.min(act.pct,100)/100*283;
+    const gTgt=Math.min(tgtNow,100)/100*283;
 
+    // QP bars: แสดงผลจริงเดิมทุก Q แต่เส้นเป้าต่างกันตาม Q
     const qBars=['q1','q2','q3','q4'].map((q,i)=>{
       const qTgt=T[q][1];
-      const qData=QALL[q]||null;
-      const dispAct=qData?(qData[cf]??qData.all??null):null;
       const isCur=q===qk;
+      // แสดง bar จริงทุก Q (เต็มทุกช่อง) เส้นเป้าตาม Q นั้นๆ
       return`<div class="qp-row" style="${isCur?`background:#eff6ff;border-radius:5px;padding:2px 4px;margin:-2px -4px;margin-bottom:5px`:''}">
-        <div class="qp-label" style="color:${isCur?color:''}">${['Q1','Q2','Q3','Q4'][i]}</div>
+        <div class="qp-label" style="color:${isCur?color:''};font-weight:${isCur?800:700}">${['Q1','Q2','Q3','Q4'][i]}</div>
         <div class="qp-track">
           <div class="qp-tgt" style="width:${qTgt}%;background:${color}"></div>
-          ${dispAct!=null?`<div class="qp-act" style="width:${Math.min(dispAct,100)}%;background:${bc(dispAct)}"></div>`:''}
+          <div class="qp-act" style="width:${Math.min(act.pct,100)}%;background:${bc(act.pct)}"></div>
           <div class="qp-tline" style="left:${qTgt}%"></div>
-          <div class="qp-inner">${dispAct!=null?dispAct.toFixed(1)+'%':''}</div>
+          <div class="qp-inner">${act.pct.toFixed(1)}%</div>
         </div>
         <div class="qp-vals">
           <div class="qp-tv">เป้า ${qTgt}%</div>
-          ${dispAct!=null?`<div class="qp-av" style="color:${bc(dispAct)}">${dispAct.toFixed(1)}%</div>`:'<div style="color:var(--muted)">—</div>'}
+          <div class="qp-av" style="color:${bc(act.pct)}">${act.pct.toFixed(1)}%</div>
         </div>
       </div>`;
     }).join('');
@@ -590,22 +453,20 @@ function renderOverview(){
             <svg viewBox="0 0 100 100" width="90" height="90">
               <circle class="g-track" cx="50" cy="50" r="45"/>
               <circle class="g-target" cx="50" cy="50" r="45" stroke="${color}" stroke-dashoffset="${283-gTgt}"/>
-              ${isReal?`<circle class="g-actual" cx="50" cy="50" r="45" stroke="${aColor}" stroke-dashoffset="${283-gAct}"/>`:''}
+              <circle class="g-actual" cx="50" cy="50" r="45" stroke="${aColor}" stroke-dashoffset="${283-gAct}"/>
             </svg>
             <div class="g-text">
-              <div class="g-pct" style="color:${isReal?aColor:color}">${isReal?actualPct.toFixed(1)+'%':tgtNow+'%'}</div>
-              <div class="g-lbl">${isReal?'จริง':'เป้า'}</div>
+              <div class="g-pct" style="color:${aColor}">${act.pct.toFixed(1)}%</div>
+              <div class="g-lbl">จริง</div>
             </div>
           </div>
           <div class="gi">
             <div class="gi-row"><span class="gi-l">เป้า Q${curQ}</span><span class="gi-r" style="color:${color}">${tgtNow}%</span></div>
-            ${isReal?`
-            <div class="gi-row"><span class="gi-l">ผลจริง</span><span class="gi-r" style="color:${aColor}">${actualPct.toFixed(2)}%</span></div>
+            <div class="gi-row"><span class="gi-l">ผลจริง</span><span class="gi-r" style="color:${aColor}">${act.pct.toFixed(2)}%</span></div>
             <div class="gi-row"><span class="gi-l">ส่วนต่าง</span><span class="diff-badge ${diffCls(diff)}">${diffTxt(diff)}</span></div>
-            `:`<div style="color:var(--muted);font-size:11px;margin-top:8px">ยังไม่มีข้อมูลจริง<br><a href="javascript:openQMod('${qk}')" style="color:var(--primary2);font-size:10px">+ บันทึกข้อมูลจริง Q${curQ}</a></div>`}
           </div>
         </div>
-        <div class="qp-wrap"><div class="qp-title">เส้นทางเป้าหมายทุกไตรมาส</div>${qBars}</div>
+        <div class="qp-wrap"><div class="qp-title">ผลจริงเทียบเป้าหมายทุกไตรมาส</div>${qBars}</div>
       </div>
     </div>`;
   }).join('');
@@ -616,29 +477,38 @@ function renderOverview(){
     <thead>
       <tr>
         <th rowspan="2" style="text-align:left;vertical-align:middle">รายการ</th>
-        <th colspan="3">ไตรมาส 1 (ต.ค.-ธ.ค. 67)</th>
-        <th colspan="3">ไตรมาส 2 (ม.ค.-มี.ค. 68)</th>
-        <th colspan="3" class="qact"><span class="qhdr">▶ ไตรมาส 3 ปัจจุบัน (เม.ย.-มิ.ย. 68)</span></th>
-        <th colspan="3">ไตรมาส 4 (ก.ค.-ก.ย. 68)</th>
+        <th colspan="2">ไตรมาส 1<br><small style="font-weight:400;opacity:.7">ต.ค.-ธ.ค. 67</small></th>
+        <th colspan="2">ไตรมาส 2<br><small style="font-weight:400;opacity:.7">ม.ค.-มี.ค. 68</small></th>
+        <th colspan="2" class="qact"><span class="qhdr">▶ ไตรมาส 3 ปัจจุบัน</span><br><small style="font-weight:400;opacity:.8">เม.ย.-มิ.ย. 68</small></th>
+        <th colspan="2">ไตรมาส 4<br><small style="font-weight:400;opacity:.7">ก.ค.-ก.ย. 68</small></th>
       </tr>
       <tr>
-        <th class="tcell">เพดานเป้า</th><th class="tcell">เป้าขั้นต่ำ</th><th class="tcell">จริง</th>
-        <th class="tcell">เพดานเป้า</th><th class="tcell">เป้าขั้นต่ำ</th><th class="tcell">จริง</th>
-        <th class="tcell qact">เพดานเป้า</th><th class="tcell qact">เป้าขั้นต่ำ</th>
-        <th class="qact" style="font-weight:800;color:#1d4ed8">จริง</th>
-        <th class="tcell">เพดานเป้า</th><th class="tcell">เป้าขั้นต่ำ</th><th class="tcell">จริง</th>
+        <th class="tcell">เป้าขั้นต่ำ</th><th class="tcell" style="font-weight:800">ผลจริง / ส่วนต่าง</th>
+        <th class="tcell">เป้าขั้นต่ำ</th><th class="tcell" style="font-weight:800">ผลจริง / ส่วนต่าง</th>
+        <th class="tcell qact">เป้าขั้นต่ำ</th><th class="qact" style="font-weight:800;color:#1d4ed8">ผลจริง / ส่วนต่าง</th>
+        <th class="tcell">เป้าขั้นต่ำ</th><th class="tcell">ผลจริง / ส่วนต่าง</th>
       </tr>
     </thead>
     <tbody>
       ${ks.map(k=>{
-        const T=TARGETS[k];
-        const cf=catField[k];
-        function qCell(qk,isCur){
-          const qd=QALL[qk]||null;
-          const p=qd?(qd[cf]??qd.all??null):null;
-          const tgt=T[qk][1];
+        const T=TARGETS[k],act=ACT[k];
+        function cell(qk,isCur){
+          const tgt=T[qk][1], p=act.pct, d=+(p-tgt).toFixed(2);
           const cls=isCur?'qact':'tcell';
-          if(p===null) return`<td class="${cls}" style="color:var(--muted)">—</td>`;
+          return`<td class="${cls}" style="white-space:nowrap">
+            <span style="font-size:13px;font-weight:800;color:${bc(p)}">${p.toFixed(2)}%</span>
+            <span class="diff-badge ${diffCls(d)}" style="margin-left:4px;font-size:9px">${diffTxt(d)}</span>
+          </td>`;
+        }
+        return`<tr>
+          <td>${TI[k]} ${k}</td>
+          <td class="tcell" style="color:var(--muted)">${T.q1[1]}%</td>${cell('q1',false)}
+          <td class="tcell" style="color:var(--muted)">${T.q2[1]}%</td>${cell('q2',false)}
+          <td class="tcell qact" style="color:var(--muted)">${T.q3[1]}%</td>${cell('q3',true)}
+          <td class="tcell" style="color:var(--muted)">${T.q4[1]}%</td>${cell('q4',false)}
+        </tr>`;
+      }).join('')}
+    </tbody>\`;
           const d=+(p-tgt).toFixed(2);
           return`<td class="${cls}">
             <span style="font-size:13px;font-weight:800;color:${bc(p)}">${p.toFixed(2)}%</span>
@@ -902,7 +772,6 @@ async function loadLiveData(){
       if(parsed&&parsed.agencies&&parsed.agencies.length>0){
         Object.assign(DATA,parsed);
         if(parsed.reportDate) DATA.reportDate=parsed.reportDate;
-        autoSaveCurrentQ();
         renderOverview();
         if(document.getElementById('pg-agencies').classList.contains('active'))renderAg();
         if(document.getElementById('pg-invest').classList.contains('active'))renderInvest();
@@ -1040,43 +909,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('nb-obt').textContent=obt.length;
   document.getElementById('nb-gov').textContent=gov.length;
   renderOverview();
-  updateQDataStatus();
   // Show static data loaded
   document.getElementById('lastUpdate').textContent='ข้อมูลสำรอง (กำลังโหลด Google Sheets...)';
   setTimeout(loadLiveData,800);
 });
 </script>
 
-<!-- QDATA MODAL -->
-<div class="qmod-bg" id="qmodBg">
-  <div class="qmod">
-    <h3>📝 บันทึกผลการเบิกจ่ายจริงรายไตรมาส</h3>
-    <div class="qmod-sub">กรอกตัวเลข %เบิกจ่ายจริง ณ สิ้นแต่ละไตรมาส เพื่อเปรียบเทียบกับเป้าหมาย</div>
-    <div class="qmod-tabs" id="qmodTabs"></div>
-    <div class="qmod-info" id="qmodInfo"></div>
-    <div class="qmod-fields">
-      <div class="qfield">
-        <label>📊 ภาพรวม</label>
-        <input type="number" id="qf_all" min="0" max="100" step="0.01" placeholder="เช่น 55.56">
-        <span class="punit">%</span>
-      </div>
-      <div class="qfield">
-        <label>📋 รายจ่ายประจำ</label>
-        <input type="number" id="qf_op" min="0" max="100" step="0.01" placeholder="เช่น 77.37">
-        <span class="punit">%</span>
-      </div>
-      <div class="qfield">
-        <label>🏗️ รายจ่ายลงทุน</label>
-        <input type="number" id="qf_inv" min="0" max="100" step="0.01" placeholder="เช่น 43.17">
-        <span class="punit">%</span>
-      </div>
-    </div>
-    <div class="qmod-btns">
-      <button class="qbtn qbtn-del" onclick="delQData()">🗑 ลบข้อมูล Q นี้</button>
-      <button class="qbtn qbtn-cancel" onclick="document.getElementById('qmodBg').classList.remove('open')">ยกเลิก</button>
-      <button class="qbtn qbtn-save" onclick="saveQData()">💾 บันทึก</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
