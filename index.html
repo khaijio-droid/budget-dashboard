@@ -390,11 +390,12 @@ function setQ(q,btn){
 function buildQTabs(){
   const wrap=document.getElementById('qTabsWrap');
   if(!wrap) return;
-  wrap.innerHTML=FISCAL.qtabs.map(t=>`
-    <button class="qtab${t.q===FISCAL.q?' cur':''} ${t.q===curQ?' active':''}"
-      onclick="setQ(${t.q},this)">
-      ไตรมาส ${t.q}<span class="qtab-sub">${t.label}${t.q===FISCAL.q?' ▶ ปัจจุบัน':''}</span>
-    </button>`).join('');
+  wrap.innerHTML=FISCAL.qtabs.map(t=>{
+    const isCur=t.q===FISCAL.q, isActive=t.q===curQ;
+    const cls='qtab'+(isCur?' cur':'')+(isActive?' active':'');
+    const sub=t.label+(isCur?' ▶ ปัจจุบัน':'');
+    return '<button class="'+cls+'" onclick="setQ('+t.q+',this)">ไตรมาส '+t.q+'<span class="qtab-sub">'+sub+'</span></button>';
+  }).join('');
 }
 
 function renderOverview(){
@@ -507,60 +508,41 @@ function renderOverview(){
 
   // SUMMARY TABLE
   const ks=Object.keys(TARGETS);
-  document.getElementById('sumTable').innerHTML=`
-    <thead>
-      <tr>
-        <th rowspan="2" style="text-align:left;vertical-align:middle">รายการ</th>
-        ${FISCAL.qtabs.map(t=>`<th colspan="2"${t.q===FISCAL.q?' class="qact"':''}>
-          ${t.q===FISCAL.q?`<span class="qhdr">▶ ไตรมาส ${t.q} ปัจจุบัน</span>`:`ไตรมาส ${t.q}`}
-          <br><small style="font-weight:400;opacity:.7">${t.label}</small></th>`).join('')}
-      </tr>
-      <tr>
-        <th class="tcell">เป้าขั้นต่ำ</th><th class="tcell" style="font-weight:800">ผลจริง / ส่วนต่าง</th>
-        <th class="tcell">เป้าขั้นต่ำ</th><th class="tcell" style="font-weight:800">ผลจริง / ส่วนต่าง</th>
-        <th class="tcell qact">เป้าขั้นต่ำ</th><th class="qact" style="font-weight:800;color:#1d4ed8">ผลจริง / ส่วนต่าง</th>
-        <th class="tcell">เป้าขั้นต่ำ</th><th class="tcell">ผลจริง / ส่วนต่าง</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${ks.map(k=>{
-        const T=TARGETS[k],act=ACT[k];
-        function cell(qk,isCur){
-          const tgt=T[qk][1], p=act.pct, d=+(p-tgt).toFixed(2);
-          const cls=isCur?'qact':'tcell';
-          return`<td class="${cls}" style="white-space:nowrap">
-            <span style="font-size:13px;font-weight:800;color:${bc(p)}">${p.toFixed(2)}%</span>
-            <span class="diff-badge ${diffCls(d)}" style="margin-left:4px;font-size:9px">${diffTxt(d)}</span>
-          </td>`;
-        }
-        return`<tr>
-          <td>${TI[k]} ${k}</td>
-          <td class="tcell" style="color:var(--muted)">${T.q1[1]}%</td>${cell('q1',false)}
-          <td class="tcell" style="color:var(--muted)">${T.q2[1]}%</td>${cell('q2',false)}
-          <td class="tcell qact" style="color:var(--muted)">${T.q3[1]}%</td>${cell('q3',true)}
-          <td class="tcell" style="color:var(--muted)">${T.q4[1]}%</td>${cell('q4',false)}
-        </tr>`;
-      }).join('')}
-    </tbody>\`;
-          const d=+(p-tgt).toFixed(2);
-          return`<td class="${cls}">
-            <span style="font-size:13px;font-weight:800;color:${bc(p)}">${p.toFixed(2)}%</span>
-            <span class="diff-badge ${diffCls(d)}" style="margin-left:4px;font-size:9px">${diffTxt(d)}</span>
-          </td>`;
-        }
-        return`<tr>
-          <td>${TI[k]} ${k}</td>
-          <td class="tcell">${T.q1[0]}%</td><td class="tcell">${T.q1[1]}%</td>
-          ${qCell('q1',false)}
-          <td class="tcell">${T.q2[0]}%</td><td class="tcell">${T.q2[1]}%</td>
-          ${qCell('q2',false)}
-          <td class="tcell qact">${T.q3[0]}%</td><td class="tcell qact">${T.q3[1]}%</td>
-          ${qCell('q3',true)}
-          <td class="tcell">${T.q4[0]}%</td><td class="tcell">${T.q4[1]}%</td>
-          ${qCell('q4',false)}
-        </tr>`;
-      }).join('')}
-    </tbody>`;
+  document.getElementById('sumTable').innerHTML=(()=>{
+    const qLabels=['ต.ค.-ธ.ค.','ม.ค.-มี.ค.','เม.ย.-มิ.ย.','ก.ค.-ก.ย.'];
+    const qPeriods=FISCAL.qtabs.map(t=>t.label);
+    const qs=['q1','q2','q3','q4'];
+    let hdrRow1='<th rowspan="2" style="text-align:left;vertical-align:middle">รายการ</th>';
+    let hdrRow2='';
+    qs.forEach((qk,i)=>{
+      const isCur=(i+1)===FISCAL.q;
+      const cls=isCur?' class="qact"':'';
+      const title=isCur?('<span class="qhdr">▶ ไตรมาส '+(i+1)+' ปัจจุบัน</span>'):'ไตรมาส '+(i+1);
+      hdrRow1+=`<th colspan="2"${cls}>${title}<br><small style="font-weight:400;opacity:.7">${qPeriods[i]}</small></th>`;
+      const clsCell=isCur?' class="tcell qact"':' class="tcell"';
+      const clsAct=isCur?' class="qact"':' class="tcell"';
+      hdrRow2+=`<th${clsCell}>เป้าขั้นต่ำ</th><th${isCur?' class="qact" style="font-weight:800;color:#1d4ed8"':' class="tcell"'}>${isCur?'ผลจริง':'ผลจริง'}</th>`;
+    });
+    let tbody='';
+    ks.forEach(k=>{
+      const T=TARGETS[k],act=ACT[k];
+      let cells='<td>'+TI[k]+' '+k+'</td>';
+      qs.forEach((qk,i)=>{
+        const isCur=(i+1)===FISCAL.q;
+        const tgt=T[qk][1];
+        const diff=+(act.pct-tgt).toFixed(2);
+        const aColor=bc(act.pct);
+        const tgtCell=`<td class="${isCur?'tcell qact':'tcell'}">${tgt}%</td>`;
+        const actCell=`<td class="${isCur?'qact':'tcell'}">
+          <span style="font-size:13px;font-weight:800;color:${aColor}">${act.pct.toFixed(2)}%</span>
+          <span class="diff-badge ${diffCls(diff)}" style="margin-left:4px;font-size:9px">${diffTxt(diff)}</span>
+        </td>`;
+        cells+=tgtCell+actCell;
+      });
+      tbody+=`<tr>${cells}</tr>`;
+    });
+    return `<thead><tr>${hdrRow1}</tr><tr>${hdrRow2}</tr></thead><tbody>${tbody}</tbody>`;
+  })()
 }
 
 // ======== AGENCIES ========
