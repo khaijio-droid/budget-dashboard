@@ -769,6 +769,8 @@ async function loadLiveData(){
     SHEET_URL,
     `https://corsproxy.io/?${encodeURIComponent(SHEET_URL)}`,
     `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_URL)}`,
+    `https://thingproxy.freeboard.io/fetch/${SHEET_URL}`,
+    `https://proxy.cors.sh/${SHEET_URL}`,
   ];
 
   async function tryFetch(url){
@@ -802,9 +804,9 @@ async function loadLiveData(){
     showToast(`✅ โหลดสำเร็จ — ${parsed.agencies.length} หน่วยงาน`,'success');
   }catch(e){
     ind.style.background='#ef4444';
-    upd.textContent='โหลดไม่สำเร็จ — ใช้ข้อมูลสำรอง';
+    upd.textContent='โหลดไม่สำเร็จ — ตรวจสอบการเผยแพร่ Sheets';
     btn.disabled=false; btn.textContent='🔄 ลองใหม่';
-    showToast('⚠️ โหลดไม่สำเร็จ — ใช้ข้อมูลสำรองแทน','warn');
+    showToast('⚠️ โหลด Sheets ไม่สำเร็จ — กรุณาตรวจสอบว่า Google Sheets ยังเผยแพร่อยู่','warn');
   }
 }
 
