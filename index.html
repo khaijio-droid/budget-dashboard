@@ -286,7 +286,7 @@ tbody td:first-child{text-align:left;font-weight:700}
 </div>
 
 <script>
-const SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv';
+const SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv&gid=1025107905';
 
 const TARGETS={
   'ภาพรวม':      {q1:[38,33],q2:[61,55],q3:[81,76],q4:[100,93]},
@@ -774,13 +774,19 @@ async function loadLiveData(){
   ];
 
   async function tryFetch(url){
-    const res=await fetch(url,{signal:AbortSignal.timeout(8000)});
+    const cacheBust = url.includes('?') ? '&_='+Date.now() : '?_='+Date.now();
+    const fetchUrl = url + cacheBust;
+    const res=await fetch(fetchUrl,{
+      signal:AbortSignal.timeout(10000),
+      cache:'no-cache'
+    });
     if(!res.ok) throw new Error('HTTP '+res.status);
     const buf=await res.arrayBuffer();
     let csv;
     try{csv=new TextDecoder('utf-8',{fatal:true}).decode(buf);}
     catch(e){csv=new TextDecoder('windows-874').decode(buf);}
-    if(!csv.includes('หน่วยงาน')) throw new Error('no data');
+    // ตรวจสอบว่าได้ข้อมูลถูกชีต (มีคอลัมน์หน่วยงาน)
+    if(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total')) throw new Error('wrong sheet');
     const parsed=parseSheetCSV(csv);
     if(!parsed||!parsed.agencies||parsed.agencies.length===0) throw new Error('parse failed');
     return parsed;
@@ -801,7 +807,8 @@ async function loadLiveData(){
     ind.style.background='#22c55e';
     btn.disabled=false; btn.textContent='✅ อัปเดตสำเร็จ';
     setTimeout(()=>{btn.textContent='🔄 อัปเดต';},3000);
-    showToast(`✅ โหลดสำเร็จ — ${parsed.agencies.length} หน่วยงาน`,'success');
+    console.log('✅ Loaded from:', url.slice(0,60));
+    showToast('✅ โหลดสำเร็จ — '+parsed.agencies.length+' หน่วยงาน','success');
   }catch(e){
     ind.style.background='#ef4444';
     upd.textContent='โหลดไม่สำเร็จ — ตรวจสอบการเผยแพร่ Sheets';
