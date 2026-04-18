@@ -765,35 +765,39 @@ async function loadLiveData(){
   ind.style.background='#f59e0b';
   upd.textContent='กำลังโหลด...';
 
-  const urls=[
-    SHEET_URL,
-    `https://corsproxy.io/?${encodeURIComponent(SHEET_URL)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_URL)}`,
-    `https://thingproxy.freeboard.io/fetch/${SHEET_URL}`,
-    `https://proxy.cors.sh/${SHEET_URL}`,
+  // attempts: { url, useJSON } — useJSON=true สำหรับ proxy ที่คืน {contents:...}
+  const attempts=[
+    { url: SHEET_URL, useJSON: false },
+    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(SHEET_URL)}`, useJSON: true },
+    { url: `https://corsproxy.io/?${encodeURIComponent(SHEET_URL)}`, useJSON: false },
+    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(SHEET_URL)}`, useJSON: false },
+    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_URL)}`, useJSON: false },
   ];
 
-  async function tryFetch(url){
+  async function tryFetch(url, useJSON=false){
     const cacheBust = url.includes('?') ? '&_='+Date.now() : '?_='+Date.now();
-    const fetchUrl = url + cacheBust;
-    const res=await fetch(fetchUrl,{
-      signal:AbortSignal.timeout(10000),
+    const res=await fetch(url + cacheBust,{
+      signal:AbortSignal.timeout(12000),
       cache:'no-cache'
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
-    const buf=await res.arrayBuffer();
     let csv;
-    try{csv=new TextDecoder('utf-8',{fatal:true}).decode(buf);}
-    catch(e){csv=new TextDecoder('windows-874').decode(buf);}
-    // ตรวจสอบว่าได้ข้อมูลถูกชีต (มีคอลัมน์หน่วยงาน)
-    if(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total')) throw new Error('wrong sheet');
+    if(useJSON){
+      const json=await res.json();
+      csv=json.contents;
+    } else {
+      const buf=await res.arrayBuffer();
+      try{csv=new TextDecoder('utf-8',{fatal:true}).decode(buf);}
+      catch(e){csv=new TextDecoder('windows-874').decode(buf);}
+    }
+    if(!csv||(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total'))) throw new Error('wrong sheet');
     const parsed=parseSheetCSV(csv);
     if(!parsed||!parsed.agencies||parsed.agencies.length===0) throw new Error('parse failed');
     return parsed;
   }
 
   try{
-    const parsed=await Promise.any(urls.map(u=>tryFetch(u)));
+    const parsed=await Promise.any(attempts.map(a=>tryFetch(a.url, a.useJSON)));
     Object.assign(DATA,parsed);
     if(parsed.reportDate) DATA.reportDate=parsed.reportDate;
     renderOverview();
@@ -807,7 +811,7 @@ async function loadLiveData(){
     ind.style.background='#22c55e';
     btn.disabled=false; btn.textContent='✅ อัปเดตสำเร็จ';
     setTimeout(()=>{btn.textContent='🔄 อัปเดต';},3000);
-    console.log('✅ Loaded from:', url.slice(0,60));
+    console.log('✅ Loaded live data — '+parsed.agencies.length+' agencies');
     showToast('✅ โหลดสำเร็จ — '+parsed.agencies.length+' หน่วยงาน','success');
   }catch(e){
     ind.style.background='#ef4444';
