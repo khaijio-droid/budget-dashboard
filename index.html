@@ -287,6 +287,12 @@ tbody td:first-child{text-align:left;font-weight:700}
 
 <script>
 const SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv&gid=1025107905';
+// ★ ใส่ URL Apps Script ที่ Deploy แล้วตรงนี้ (ทำครั้งเดียว ใช้ได้ตลอด)
+const APPS_SCRIPT_URL = ''; // เช่น 'https://script.google.com/macros/s/AKfycb.../exec'
+// GVIZ fallback (Google รองรับ CORS โดยตรง)
+const SHEET_KEY='2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ';
+const SHEET_GID='1025107905';
+const GVIZ_URL=`https://docs.google.com/spreadsheets/d/e/${SHEET_KEY}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
 
 const TARGETS={
   'ภาพรวม':      {q1:[38,33],q2:[61,55],q3:[81,76],q4:[100,93]},
@@ -756,6 +762,42 @@ function renderInvest(){
   document.getElementById('nb-inv').textContent=n;
 }
 
+// ======== APPS SCRIPT JSON → DATA ========
+function parseAppsScriptJSON(json){
+  // แปลง JSON จาก Apps Script ให้ตรงกับโครงสร้าง DATA ที่ HTML ใช้
+  const r2=n=>Math.round((Number(n)||0)*100)/100;
+  const agencies=(json.agencies||[]).map(ag=>{
+    const grp=ag.grp||{};
+    const op  =grp['งบประจำ']||{a:0,s:0,p:0};
+    const inv =grp['งบลงทุน']||{a:0,s:0,p:0};
+    const spe =grp['เงินอุดหนุนเฉพาะกิจ']||{a:0,s:0,p:0};
+    const inv_a=r2(inv.a+spe.a), inv_s=r2(inv.s+spe.s);
+    const inv_p=inv_a>0?r2(inv_s/inv_a*100):0;
+    // แปลง items ให้ใช้ cat ภาษาไทยตามเดิม
+    const projects=(ag.projects||[]).map(p=>({
+      ...p,
+      items:(p.items||[]).map(it=>({
+        b:it.b||'',s:it.s||'',
+        a:Number(it.a)||0,sp:Number(it.sp)||0,
+        cat:it.cat||'งบประจำ'
+      }))
+    }));
+    return{
+      n:ag.n,
+      ministry:ag.ministry||'',
+      g:ag.g||'ราชการ',
+      a:ag.a,sp:ag.sp,pa:ag.pa||0,
+      op_a:op.a,op_s:op.s,op_p:op.p,
+      inv_a,inv_s,inv_p,
+      projects
+    };
+  });
+  return{
+    summary:{a:json.summary.a,s:json.summary.s,p:json.summary.p},
+    agencies
+  };
+}
+
 // ======== LIVE DATA ========
 async function loadLiveData(){
   const btn=document.getElementById('syncBtn');
@@ -765,59 +807,77 @@ async function loadLiveData(){
   ind.style.background='#f59e0b';
   upd.textContent='กำลังโหลด...';
 
-  // attempts: { url, useJSON } — useJSON=true สำหรับ proxy ที่คืน {contents:...}
-  const attempts=[
-    { url: SHEET_URL, useJSON: false },
-    { url: `https://api.allorigins.win/get?url=${encodeURIComponent(SHEET_URL)}`, useJSON: true },
-    { url: `https://corsproxy.io/?${encodeURIComponent(SHEET_URL)}`, useJSON: false },
-    { url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(SHEET_URL)}`, useJSON: false },
-    { url: `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_URL)}`, useJSON: false },
-  ];
+  // ─── วิธีที่ 1: Apps Script JSON (เสถียรที่สุด) ───────────────────────
+  if(APPS_SCRIPT_URL){
+    try{
+      const sep=APPS_SCRIPT_URL.includes('?')?'&':'?';
+      const res=await fetch(APPS_SCRIPT_URL+sep+'format=json&_='+Date.now(),{
+        signal:AbortSignal.timeout(15000),cache:'no-cache'
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const json=await res.json();
+      if(!json||!json.agencies||json.agencies.length===0) throw new Error('empty');
+      const parsed=parseAppsScriptJSON(json);
+      applyData(parsed,'✅ โหลดจาก Apps Script');
+      return;
+    }catch(e){ console.warn('Apps Script failed:',e.message); }
+  }
 
-  async function tryFetch(url, useJSON=false){
-    const cacheBust = url.includes('?') ? '&_='+Date.now() : '?_='+Date.now();
-    const res=await fetch(url + cacheBust,{
-      signal:AbortSignal.timeout(12000),
-      cache:'no-cache'
+  // ─── วิธีที่ 2: GVIZ / CSV proxy ─────────────────────────────────────
+  async function fetchCSV(url,mode){
+    const sep=url.includes('?')?'&':'?';
+    const res=await fetch(url+sep+'_='+Date.now(),{
+      signal:AbortSignal.timeout(13000),cache:'no-cache'
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
-    let csv;
-    if(useJSON){
-      const json=await res.json();
-      csv=json.contents;
-    } else {
-      const buf=await res.arrayBuffer();
-      try{csv=new TextDecoder('utf-8',{fatal:true}).decode(buf);}
-      catch(e){csv=new TextDecoder('windows-874').decode(buf);}
+    if(mode==='json'){
+      const j=await res.json();
+      return j.contents||j.data||'';
     }
-    if(!csv||(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total'))) throw new Error('wrong sheet');
+    const buf=await res.arrayBuffer();
+    try{return new TextDecoder('utf-8',{fatal:true}).decode(buf);}
+    catch(e){return new TextDecoder('windows-874').decode(buf);}
+  }
+
+  async function tryCSV(url,mode){
+    const csv=await fetchCSV(url,mode);
+    if(!csv||(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total')))
+      throw new Error('wrong-sheet');
     const parsed=parseSheetCSV(csv);
-    if(!parsed||!parsed.agencies||parsed.agencies.length===0) throw new Error('parse failed');
+    if(!parsed||!parsed.agencies||parsed.agencies.length===0) throw new Error('parse-failed');
     return parsed;
   }
 
+  const sources=[
+    {url:GVIZ_URL,mode:'text'},
+    {url:'https://api.allorigins.win/get?url='+encodeURIComponent(SHEET_URL),mode:'json'},
+    {url:'https://corsproxy.io/?'+encodeURIComponent(SHEET_URL),mode:'text'},
+    {url:SHEET_URL,mode:'text'},
+  ];
+
   try{
-    const parsed=await Promise.any(attempts.map(a=>tryFetch(a.url, a.useJSON)));
+    const parsed=await Promise.any(sources.map(s=>tryCSV(s.url,s.mode)));
+    applyData(parsed,'✅ โหลดจาก Google Sheets CSV');
+  }catch(e){
+    console.error('All sources failed:',e);
+    ind.style.background='#ef4444';
+    upd.textContent='โหลดไม่สำเร็จ — แสดงข้อมูลสำรอง';
+    btn.disabled=false; btn.textContent='🔄 ลองใหม่';
+    showToast('⚠️ โหลดข้อมูลใหม่ไม่สำเร็จ — ตรวจสอบว่า Apps Script Deploy แล้วหรือยัง','warn');
+  }
+
+  function applyData(parsed,src){
     Object.assign(DATA,parsed);
-    if(parsed.reportDate) DATA.reportDate=parsed.reportDate;
     renderOverview();
     if(document.getElementById('pg-agencies').classList.contains('active'))renderAg();
     if(document.getElementById('pg-invest').classList.contains('active'))renderInvest();
     const now=new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
-    const dateLabel=parsed.reportDate?` | ข้อมูล ณ ${parsed.reportDate}`:'';
-    upd.textContent=`อัปเดต ${now}${dateLabel}`;
-    const fd=document.getElementById('footerDate');
-    if(fd&&parsed.reportDate) fd.textContent=`| ข้อมูล ณ ${parsed.reportDate}`;
+    upd.textContent=`อัปเดต ${now}`;
     ind.style.background='#22c55e';
     btn.disabled=false; btn.textContent='✅ อัปเดตสำเร็จ';
     setTimeout(()=>{btn.textContent='🔄 อัปเดต';},3000);
-    console.log('✅ Loaded live data — '+parsed.agencies.length+' agencies');
-    showToast('✅ โหลดสำเร็จ — '+parsed.agencies.length+' หน่วยงาน','success');
-  }catch(e){
-    ind.style.background='#ef4444';
-    upd.textContent='โหลดไม่สำเร็จ — ตรวจสอบการเผยแพร่ Sheets';
-    btn.disabled=false; btn.textContent='🔄 ลองใหม่';
-    showToast('⚠️ โหลด Sheets ไม่สำเร็จ — กรุณาตรวจสอบว่า Google Sheets ยังเผยแพร่อยู่','warn');
+    console.log(src,'—',parsed.agencies.length,'agencies');
+    showToast(src+' — '+parsed.agencies.length+' หน่วยงาน','success');
   }
 }
 
