@@ -184,6 +184,7 @@ tbody td:first-child{text-align:left;font-weight:700}
 .inv-row{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:7px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;cursor:pointer;transition:.15s}
 .inv-row:hover{box-shadow:0 3px 12px rgba(0,0,0,.07);border-color:var(--primary2)}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="hdr">
@@ -196,6 +197,9 @@ tbody td:first-child{text-align:left;font-weight:700}
   <div class="live"><span class="ldot" id="liveIndicator"></span><span id="lastUpdate" style="font-size:10px">กำลังโหลด...</span></div>
   <button onclick="loadLiveData()" id="syncBtn" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 12px;border-radius:12px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:8px;transition:.2s" onmouseover="this.style.background='rgba(255,255,255,.35)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">🔄 อัปเดต</button>
   <button onclick="shareURL()" id="shareBtn" style="background:rgba(245,158,11,.3);border:1px solid rgba(245,158,11,.5);color:#fff;padding:5px 12px;border-radius:12px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:6px;transition:.2s" title="คัดลอกลิงก์แชร์">🔗 แชร์</button>
+
+  <input type="file" id="fileUpload" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFileUpload(event)">
+  <button onclick="document.getElementById('fileUpload').click()" id="uploadBtn" style="background:rgba(34,197,94,.3);border:1px solid rgba(34,197,94,.5);color:#fff;padding:5px 12px;border-radius:12px;font-size:11px;cursor:pointer;font-family:inherit;margin-left:6px;transition:.2s" onmouseover="this.style.background='rgba(34,197,94,.45)'" onmouseout="this.style.background='rgba(34,197,94,.3)'" title="อัปโหลดไฟล์ Excel หรือ CSV">📂 นำเข้าไฟล์</button>
 </div>
 
 <div class="bc" id="bc"><span style="font-weight:600">🏠 ภาพรวม</span></div>
@@ -287,12 +291,6 @@ tbody td:first-child{text-align:left;font-weight:700}
 
 <script>
 const SHEET_URL='https://docs.google.com/spreadsheets/d/e/2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ/pub?output=csv&gid=1025107905';
-// ★ ใส่ URL Apps Script ที่ Deploy แล้วตรงนี้ (ทำครั้งเดียว ใช้ได้ตลอด)
-const APPS_SCRIPT_URL = ''; // เช่น 'https://script.google.com/macros/s/AKfycb.../exec'
-// GVIZ fallback (Google รองรับ CORS โดยตรง)
-const SHEET_KEY='2PACX-1vTGQLTwksSFlG-LLmekdGnE-NjJm7sQ019XjW_KLF0VlF3s4UElfD-4dH-Ong4FpHo7DzSe4FsNOZuZ';
-const SHEET_GID='1025107905';
-const GVIZ_URL=`https://docs.google.com/spreadsheets/d/e/${SHEET_KEY}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
 
 const TARGETS={
   'ภาพรวม':      {q1:[38,33],q2:[61,55],q3:[81,76],q4:[100,93]},
@@ -762,42 +760,6 @@ function renderInvest(){
   document.getElementById('nb-inv').textContent=n;
 }
 
-// ======== APPS SCRIPT JSON → DATA ========
-function parseAppsScriptJSON(json){
-  // แปลง JSON จาก Apps Script ให้ตรงกับโครงสร้าง DATA ที่ HTML ใช้
-  const r2=n=>Math.round((Number(n)||0)*100)/100;
-  const agencies=(json.agencies||[]).map(ag=>{
-    const grp=ag.grp||{};
-    const op  =grp['งบประจำ']||{a:0,s:0,p:0};
-    const inv =grp['งบลงทุน']||{a:0,s:0,p:0};
-    const spe =grp['เงินอุดหนุนเฉพาะกิจ']||{a:0,s:0,p:0};
-    const inv_a=r2(inv.a+spe.a), inv_s=r2(inv.s+spe.s);
-    const inv_p=inv_a>0?r2(inv_s/inv_a*100):0;
-    // แปลง items ให้ใช้ cat ภาษาไทยตามเดิม
-    const projects=(ag.projects||[]).map(p=>({
-      ...p,
-      items:(p.items||[]).map(it=>({
-        b:it.b||'',s:it.s||'',
-        a:Number(it.a)||0,sp:Number(it.sp)||0,
-        cat:it.cat||'งบประจำ'
-      }))
-    }));
-    return{
-      n:ag.n,
-      ministry:ag.ministry||'',
-      g:ag.g||'ราชการ',
-      a:ag.a,sp:ag.sp,pa:ag.pa||0,
-      op_a:op.a,op_s:op.s,op_p:op.p,
-      inv_a,inv_s,inv_p,
-      projects
-    };
-  });
-  return{
-    summary:{a:json.summary.a,s:json.summary.s,p:json.summary.p},
-    agencies
-  };
-}
-
 // ======== LIVE DATA ========
 async function loadLiveData(){
   const btn=document.getElementById('syncBtn');
@@ -807,77 +769,55 @@ async function loadLiveData(){
   ind.style.background='#f59e0b';
   upd.textContent='กำลังโหลด...';
 
-  // ─── วิธีที่ 1: Apps Script JSON (เสถียรที่สุด) ───────────────────────
-  if(APPS_SCRIPT_URL){
-    try{
-      const sep=APPS_SCRIPT_URL.includes('?')?'&':'?';
-      const res=await fetch(APPS_SCRIPT_URL+sep+'format=json&_='+Date.now(),{
-        signal:AbortSignal.timeout(15000),cache:'no-cache'
-      });
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      const json=await res.json();
-      if(!json||!json.agencies||json.agencies.length===0) throw new Error('empty');
-      const parsed=parseAppsScriptJSON(json);
-      applyData(parsed,'✅ โหลดจาก Apps Script');
-      return;
-    }catch(e){ console.warn('Apps Script failed:',e.message); }
-  }
+  const urls=[
+    SHEET_URL,
+    `https://corsproxy.io/?${encodeURIComponent(SHEET_URL)}`,
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_URL)}`,
+    `https://thingproxy.freeboard.io/fetch/${SHEET_URL}`,
+    `https://proxy.cors.sh/${SHEET_URL}`,
+  ];
 
-  // ─── วิธีที่ 2: GVIZ / CSV proxy ─────────────────────────────────────
-  async function fetchCSV(url,mode){
-    const sep=url.includes('?')?'&':'?';
-    const res=await fetch(url+sep+'_='+Date.now(),{
-      signal:AbortSignal.timeout(13000),cache:'no-cache'
+  async function tryFetch(url){
+    const cacheBust = url.includes('?') ? '&_='+Date.now() : '?_='+Date.now();
+    const fetchUrl = url + cacheBust;
+    const res=await fetch(fetchUrl,{
+      signal:AbortSignal.timeout(10000),
+      cache:'no-cache'
     });
     if(!res.ok) throw new Error('HTTP '+res.status);
-    if(mode==='json'){
-      const j=await res.json();
-      return j.contents||j.data||'';
-    }
     const buf=await res.arrayBuffer();
-    try{return new TextDecoder('utf-8',{fatal:true}).decode(buf);}
-    catch(e){return new TextDecoder('windows-874').decode(buf);}
-  }
-
-  async function tryCSV(url,mode){
-    const csv=await fetchCSV(url,mode);
-    if(!csv||(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total')))
-      throw new Error('wrong-sheet');
+    let csv;
+    try{csv=new TextDecoder('utf-8',{fatal:true}).decode(buf);}
+    catch(e){csv=new TextDecoder('windows-874').decode(buf);}
+    // ตรวจสอบว่าได้ข้อมูลถูกชีต (มีคอลัมน์หน่วยงาน)
+    if(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total')) throw new Error('wrong sheet');
     const parsed=parseSheetCSV(csv);
-    if(!parsed||!parsed.agencies||parsed.agencies.length===0) throw new Error('parse-failed');
+    if(!parsed||!parsed.agencies||parsed.agencies.length===0) throw new Error('parse failed');
     return parsed;
   }
 
-  const sources=[
-    {url:GVIZ_URL,mode:'text'},
-    {url:'https://api.allorigins.win/get?url='+encodeURIComponent(SHEET_URL),mode:'json'},
-    {url:'https://corsproxy.io/?'+encodeURIComponent(SHEET_URL),mode:'text'},
-    {url:SHEET_URL,mode:'text'},
-  ];
-
   try{
-    const parsed=await Promise.any(sources.map(s=>tryCSV(s.url,s.mode)));
-    applyData(parsed,'✅ โหลดจาก Google Sheets CSV');
-  }catch(e){
-    console.error('All sources failed:',e);
-    ind.style.background='#ef4444';
-    upd.textContent='โหลดไม่สำเร็จ — แสดงข้อมูลสำรอง';
-    btn.disabled=false; btn.textContent='🔄 ลองใหม่';
-    showToast('⚠️ โหลดข้อมูลใหม่ไม่สำเร็จ — ตรวจสอบว่า Apps Script Deploy แล้วหรือยัง','warn');
-  }
-
-  function applyData(parsed,src){
+    const parsed=await Promise.any(urls.map(u=>tryFetch(u)));
     Object.assign(DATA,parsed);
+    if(parsed.reportDate) DATA.reportDate=parsed.reportDate;
     renderOverview();
     if(document.getElementById('pg-agencies').classList.contains('active'))renderAg();
     if(document.getElementById('pg-invest').classList.contains('active'))renderInvest();
     const now=new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
-    upd.textContent=`อัปเดต ${now}`;
+    const dateLabel=parsed.reportDate?` | ข้อมูล ณ ${parsed.reportDate}`:'';
+    upd.textContent=`อัปเดต ${now}${dateLabel}`;
+    const fd=document.getElementById('footerDate');
+    if(fd&&parsed.reportDate) fd.textContent=`| ข้อมูล ณ ${parsed.reportDate}`;
     ind.style.background='#22c55e';
     btn.disabled=false; btn.textContent='✅ อัปเดตสำเร็จ';
     setTimeout(()=>{btn.textContent='🔄 อัปเดต';},3000);
-    console.log(src,'—',parsed.agencies.length,'agencies');
-    showToast(src+' — '+parsed.agencies.length+' หน่วยงาน','success');
+    console.log('✅ Loaded from:', url.slice(0,60));
+    showToast('✅ โหลดสำเร็จ — '+parsed.agencies.length+' หน่วยงาน','success');
+  }catch(e){
+    ind.style.background='#ef4444';
+    upd.textContent='โหลดไม่สำเร็จ — ตรวจสอบการเผยแพร่ Sheets';
+    btn.disabled=false; btn.textContent='🔄 ลองใหม่';
+    showToast('⚠️ โหลด Sheets ไม่สำเร็จ — กรุณาตรวจสอบว่า Google Sheets ยังเผยแพร่อยู่','warn');
   }
 }
 
@@ -979,6 +919,79 @@ function shareURL(){
       // Fallback: prompt
       window.prompt('คัดลอก URL นี้เพื่อแชร์:', url);
     });
+  }
+}
+
+
+// ======== FILE UPLOAD (Excel / CSV) ========
+function handleFileUpload(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const btn = document.getElementById('uploadBtn');
+  const ind = document.getElementById('liveIndicator');
+  const upd = document.getElementById('lastUpdate');
+  btn.textContent = '⏳ กำลังอ่านไฟล์...';
+  btn.disabled = true;
+  ind.style.background = '#f59e0b';
+
+  const reader = new FileReader();
+  const isExcel = file.name.match(/\.(xlsx|xls)$/i);
+
+  reader.onload = function(e){
+    try{
+      let csvText = '';
+      if(isExcel){
+        // ใช้ SheetJS อ่าน Excel
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, {type:'array'});
+        // ใช้ sheet แรก
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        csvText = XLSX.utils.sheet_to_csv(ws);
+      } else {
+        // CSV — แปลง encoding ถ้าจำเป็น
+        csvText = e.target.result;
+      }
+
+      const parsed = parseSheetCSV(csvText);
+      if(!parsed || !parsed.agencies || parsed.agencies.length === 0){
+        throw new Error('ไม่พบข้อมูลหน่วยงานในไฟล์ — ตรวจสอบหัวตาราง');
+      }
+
+      Object.assign(DATA, parsed);
+      renderOverview();
+      if(document.getElementById('pg-agencies').classList.contains('active')) renderAg();
+      if(document.getElementById('pg-invest').classList.contains('active')) renderInvest();
+
+      const now = new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
+      upd.textContent = 'อัปโหลดจากไฟล์ ' + now;
+      ind.style.background = '#22c55e';
+      btn.textContent = '✅ นำเข้าสำเร็จ';
+      btn.disabled = false;
+      setTimeout(()=>{ btn.textContent = '📂 นำเข้าไฟล์'; }, 3000);
+      showToast('📂 นำเข้า ' + file.name + ' สำเร็จ — ' + parsed.agencies.length + ' หน่วยงาน', 'success');
+
+      // update nav badge
+      document.getElementById('nb-all').textContent = DATA.agencies.length;
+      const obt2 = DATA.agencies.filter(a=>['อบจ.','เทศบาล','อบต.'].includes(a.g));
+      document.getElementById('nb-obt').textContent = obt2.length;
+      document.getElementById('nb-gov').textContent = DATA.agencies.filter(a=>a.g==='ราชการ').length;
+
+    }catch(err){
+      console.error('File parse error:', err);
+      ind.style.background = '#ef4444';
+      upd.textContent = 'นำเข้าไม่สำเร็จ';
+      btn.textContent = '📂 นำเข้าไฟล์';
+      btn.disabled = false;
+      showToast('❌ นำเข้าไฟล์ไม่สำเร็จ: ' + err.message, 'error');
+    }
+    // reset file input เพื่อให้เลือกไฟล์เดิมซ้ำได้
+    event.target.value = '';
+  };
+
+  if(isExcel){
+    reader.readAsArrayBuffer(file);
+  } else {
+    reader.readAsText(file, 'utf-8');
   }
 }
 
