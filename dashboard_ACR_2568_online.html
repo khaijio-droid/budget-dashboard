@@ -768,139 +768,79 @@ async function loadLiveData(){
   ind.style.background='#f59e0b';
   upd.textContent='กำลังโหลด...';
 
-  const urls=[
-    SHEET_URL,
-    `https://corsproxy.io/?${encodeURIComponent(SHEET_URL)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(SHEET_URL)}`,
-    `https://thingproxy.freeboard.io/fetch/${SHEET_URL}`,
-    `https://proxy.cors.sh/${SHEET_URL}`,
+  // ── 1. ลอง Apps Script ก่อนเสมอ (ถ้ามี URL บันทึกไว้) ──────────────
+  const appsUrl   = localStorage.getItem('acr_apps_script_url') || APPS_SCRIPT_URL || '';
+  const sheetName = localStorage.getItem('acr_sheet_name') || 'Sheet1';
+
+  if(appsUrl && appsUrl.startsWith('https://script.google.com')){
+    try{
+      const sep = appsUrl.includes('?') ? '&' : '?';
+      const res = await fetch(
+        appsUrl + sep + 'sheet=' + encodeURIComponent(sheetName) + '&_=' + Date.now(),
+        { signal: AbortSignal.timeout(15000), cache: 'no-cache' }
+      );
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if(json.error) throw new Error(json.error);
+      if(!json.agencies || json.agencies.length === 0) throw new Error('ไม่พบข้อมูลหน่วยงาน');
+      const parsed = parseAppsScriptJSON(json);
+      applyData(parsed, '✅ โหลดจาก Apps Script');
+      return;
+    } catch(e){
+      console.warn('Apps Script failed:', e.message);
+      showToast('⚠️ Apps Script: ' + e.message, 'warn');
+    }
+  }
+
+  // ── 2. Fallback: CSV proxy ──────────────────────────────────────────
+  const csvSources = [
+    GVIZ_URL,
+    'https://corsproxy.io/?' + encodeURIComponent(SHEET_URL),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(SHEET_URL),
   ];
 
-  async function tryFetch(url){
-    const cacheBust = url.includes('?') ? '&_='+Date.now() : '?_='+Date.now();
-    const fetchUrl = url + cacheBust;
-    const res=await fetch(fetchUrl,{
-      signal:AbortSignal.timeout(10000),
-      cache:'no-cache'
-    });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const buf=await res.arrayBuffer();
+  async function tryCSV(url){
+    const res = await fetch(url + (url.includes('?')?'&':'?') + '_=' + Date.now(),
+      { signal: AbortSignal.timeout(12000), cache: 'no-cache' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const buf = await res.arrayBuffer();
     let csv;
-    try{csv=new TextDecoder('utf-8',{fatal:true}).decode(buf);}
-    catch(e){csv=new TextDecoder('windows-874').decode(buf);}
-    // ตรวจสอบว่าได้ข้อมูลถูกชีต (มีคอลัมน์หน่วยงาน)
-    if(!csv.includes('หน่วยงาน')&&!csv.includes('Grand Total')) throw new Error('wrong sheet');
-    const parsed=parseSheetCSV(csv);
-    if(!parsed||!parsed.agencies||parsed.agencies.length===0) throw new Error('parse failed');
+    try{ csv = new TextDecoder('utf-8', {fatal:true}).decode(buf); }
+    catch(e){ csv = new TextDecoder('windows-874').decode(buf); }
+    if(!csv.includes('หน่วยงาน')) throw new Error('wrong-sheet');
+    const parsed = parseSheetCSV(csv);
+    if(!parsed || !parsed.agencies || parsed.agencies.length === 0) throw new Error('parse-failed');
     return parsed;
   }
 
   try{
-    const parsed=await Promise.any(urls.map(u=>tryFetch(u)));
-    Object.assign(DATA,parsed);
-    if(parsed.reportDate) DATA.reportDate=parsed.reportDate;
+    const parsed = await Promise.any(csvSources.map(u => tryCSV(u)));
+    applyData(parsed, '✅ โหลดจาก Google Sheets CSV');
+  } catch(e){
+    ind.style.background = '#ef4444';
+    upd.textContent = 'โหลดไม่สำเร็จ — ใช้ข้อมูลสำรอง';
+    btn.disabled = false; btn.textContent = '🔄 ลองใหม่';
+    showToast('❌ โหลดข้อมูลไม่สำเร็จ: ' + (e.message||''), 'error');
+  }
+
+  function applyData(parsed, src){
+    Object.assign(DATA, parsed);
     renderOverview();
-    if(document.getElementById('pg-agencies').classList.contains('active'))renderAg();
-    if(document.getElementById('pg-invest').classList.contains('active'))renderInvest();
-    const now=new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
-    const dateLabel=parsed.reportDate?` | ข้อมูล ณ ${parsed.reportDate}`:'';
-    upd.textContent=`อัปเดต ${now}${dateLabel}`;
-    const fd=document.getElementById('footerDate');
-    if(fd&&parsed.reportDate) fd.textContent=`| ข้อมูล ณ ${parsed.reportDate}`;
-    ind.style.background='#22c55e';
-    btn.disabled=false; btn.textContent='✅ อัปเดตสำเร็จ';
-    setTimeout(()=>{btn.textContent='🔄 อัปเดต';},3000);
-    console.log('✅ Loaded from:', url.slice(0,60));
-    showToast('✅ โหลดสำเร็จ — '+parsed.agencies.length+' หน่วยงาน','success');
-  }catch(e){
-    ind.style.background='#ef4444';
-    upd.textContent='โหลดไม่สำเร็จ — ตรวจสอบการเผยแพร่ Sheets';
-    btn.disabled=false; btn.textContent='🔄 ลองใหม่';
-    showToast('⚠️ โหลด Sheets ไม่สำเร็จ — กรุณาตรวจสอบว่า Google Sheets ยังเผยแพร่อยู่','warn');
+    if(document.getElementById('pg-agencies').classList.contains('active')) renderAg();
+    if(document.getElementById('pg-invest').classList.contains('active')) renderInvest();
+    const nbAll = DATA.agencies.length;
+    document.getElementById('nb-all').textContent = nbAll;
+    document.getElementById('nb-obt').textContent = DATA.agencies.filter(a=>['อบจ.','เทศบาล','อบต.'].includes(a.g)).length;
+    document.getElementById('nb-gov').textContent = DATA.agencies.filter(a=>a.g==='ราชการ').length;
+    const now = new Date().toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'});
+    upd.textContent = 'อัปเดต ' + now;
+    ind.style.background = '#22c55e';
+    btn.disabled = false; btn.textContent = '✅ สำเร็จ';
+    setTimeout(()=>{ btn.textContent = '🔄 อัปเดต'; }, 3000);
+    showToast(src + ' — ' + nbAll + ' หน่วยงาน', 'success');
   }
 }
 
-function showToast(msg,type){
-  const t=document.createElement('div');
-  t.textContent=msg;
-  const bg=type==='success'?'#166534':type==='warn'?'#92400e':'#991b1b';
-  Object.assign(t.style,{
-    position:'fixed',bottom:'20px',right:'20px',zIndex:9999,
-    background:bg,color:'#fff',padding:'10px 18px',borderRadius:'10px',
-    fontSize:'12px',fontFamily:"'Sarabun',sans-serif",fontWeight:'600',
-    boxShadow:'0 4px 20px rgba(0,0,0,.25)',maxWidth:'340px',lineHeight:'1.4',
-    opacity:'1',transition:'opacity .5s',pointerEvents:'none'
-  });
-  document.body.appendChild(t);
-  setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),500);},4000);
-}
-
-function parseCSVRow(line){
-  const r=[];let c='',inQ=false;
-  for(const ch of line){
-    if(ch==='"'){inQ=!inQ;}
-    else if(ch===','&&!inQ){r.push(c.trim());c='';}
-    else c+=ch;
-  }
-  r.push(c.trim());
-  return r;
-}
-
-function parseSheetCSV(csv){
-  try{
-    const rawLines=csv.split('\n');
-    const lines=rawLines.map(l=>l.trim()).filter(l=>l);
-
-    // อ่าน B7 = row index 6, column index 1
-    let reportDate='';
-    if(rawLines.length>=7){
-      const r7=parseCSVRow(rawLines[6]);
-      const b7=(r7[1]||'').replace(/^"|"$/g,'').trim();
-      if(b7) reportDate=b7;
-    }
-
-    // หา header row อัตโนมัติ — แถวที่มีคอลัมน์ 'หน่วยงาน'
-    let headerIdx=0;
-    for(let i=0;i<Math.min(lines.length,15);i++){
-      if(lines[i].includes('หน่วยงาน')&&lines[i].includes('งบจัดสรร')){
-        headerIdx=i; break;
-      }
-    }
-
-    const headers=parseCSVRow(lines[headerIdx]).map(s=>s.replace(/^"|"$/g,'').trim());
-    const ci={};headers.forEach((h,i)=>{ci[h]=i;});
-    const agMap={};
-    for(let i=headerIdx+1;i<lines.length;i++){
-      const cells=lines[i].split(',');
-      const ag=(cells[ci['หน่วยงาน']]||'').replace(/^"|"$/g,'').trim();
-      if(!ag||ag==='Grand Total')continue;
-      const alloc=parseFloat((cells[ci['งบจัดสรรถือจ่ายจังหวัด (ล้านบาท)']]||'').replace(/,/g,''))||0;
-      const disb=parseFloat((cells[ci['เบิกจ่ายทั้งสิ้น (ล้านบาท)']]||'').replace(/,/g,''))||0;
-      const expType=(cells[ci['รายจ่ายประจำ/ลงทุน']]||'').trim();
-      const ministry=(cells[ci['กระทรวง (ที่หน่วยงานสังกัด)']]||'').trim();
-      const proj=(cells[ci['งาน/โครงการ']]||'').trim();
-      const budName=(cells[ci['ชื่อรหัสงบประมาณ']]||'').trim();
-      const src=(cells[ci['แหล่งของเงิน']]||'').trim();
-      let g='ราชการ';
-      if(ag.includes('อบจ.')||ag.includes('องค์การบริหารส่วนจังหวัด'))g='อบจ.';
-      else if(ag.includes('เทศบาล'))g='เทศบาล';
-      else if(ag.includes('องค์การบริหารส่วนตำบล'))g='อบต.';
-      if(!agMap[ag])agMap[ag]={n:ag,ministry,g,a:0,sp:0,op_a:0,op_s:0,inv_a:0,inv_s:0,projects:{}};
-      const a=agMap[ag];
-      a.a+=alloc;a.sp+=disb;
-      if(expType.includes('ประจำ')){a.op_a+=alloc;a.op_s+=disb;}
-      else if(expType.includes('ลงทุน')){a.inv_a+=alloc;a.inv_s+=disb;}
-      const pk=proj||'(ไม่ระบุ)';
-      if(!a.projects[pk])a.projects[pk]={n:pk,a:0,sp:0,items:[]};
-      a.projects[pk].a+=alloc;a.projects[pk].sp+=disb;
-      if(budName&&alloc>0)a.projects[pk].items.push({b:budName.substring(0,70),s:src,a:Math.round(alloc*10000)/10000,sp:Math.round(disb*10000)/10000,cat:expType.includes('ลงทุน')?'งบลงทุน':'งบประจำ'});
-    }
-    const r=x=>Math.round(x*100)/100;
-    const agencies=Object.values(agMap).map(a=>({...a,a:r(a.a),sp:r(a.sp),pa:a.a?r(a.sp/a.a*100):0,op_a:r(a.op_a),op_s:r(a.op_s),op_p:a.op_a?r(a.op_s/a.op_a*100):0,inv_a:r(a.inv_a),inv_s:r(a.inv_s),inv_p:a.inv_a?r(a.inv_s/a.inv_a*100):0,projects:Object.values(a.projects).map(p=>({...p,a:r(p.a),sp:r(p.sp),p:p.a?r(p.sp/p.a*100):0})).sort((a,b)=>b.a-a.a)})).sort((a,b)=>b.a-a.a);
-    const ta=agencies.reduce((s,a)=>s+a.a,0),ts=agencies.reduce((s,a)=>s+a.sp,0);
-    return{summary:{a:r(ta),s:r(ts),p:ta?r(ts/ta*100):0},agencies,reportDate};
-  }catch(e){console.error(e);return null;}
-}
 
 // ======== SHARE ========
 function shareURL(){
